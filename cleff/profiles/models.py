@@ -1,3 +1,4 @@
+from cleff.choices_list import GENRES
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
@@ -8,7 +9,7 @@ from geopy.geocoders import Nominatim
 from django.contrib.gis.geos import Point
 # Create your models here.
 
-
+# An Abstract Base User Model
 class ProfileModel(models.Model):
     user = models.OneToOneField(User, primary_key=True)
     email = models.EmailField(blank=True)
@@ -30,7 +31,7 @@ class ProfileModel(models.Model):
     class Meta:
         abstract = True
 
-
+# The main user model
 class Musician(ProfileModel):
     genres = models.ManyToManyField('Genre', blank=True)
     summary = models.TextField(blank=True)
@@ -43,14 +44,14 @@ class Musician(ProfileModel):
     def __str__(self):
         return '{}'.format(self.user.username)
 
-    def latest_video(self):
+    def latest_media(self):
         if Media.objects.filter(user_pk=self.pk):
             return Media.objects.filter(user_pk=self.pk)[0]
 
 
 class Genre(models.Model):
     user_pk = models.IntegerField(default=-1)
-    genre = models.CharField(max_length=20)
+    genre = models.CharField(choices=GENRES, max_length=20)
     description = models.CharField(max_length=140, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -63,9 +64,7 @@ class Media(models.Model):
     title = models.CharField(max_length=20)
     timestamp = models.DateTimeField(auto_now_add=True)
     youtube_code = models.CharField(max_length=20, blank=True)
-    video = models.FileField(upload_to='video/%Y/%m/%d/{}'.format('video'), blank=True)
     audio = models.FileField(upload_to='audio/%Y/%m/%d/{}'.format('sound'), blank=True)
-    genre = models.ManyToManyField('Genre', blank=True)
 
     def __str__(self):
         return '{} {}'.format(self.title, self.timestamp)
@@ -76,7 +75,6 @@ class Media(models.Model):
 
 class Instrument(models.Model):
     user_pk = models.IntegerField(default=-1)
-    family = models.CharField(max_length=60)
     description = models.CharField(max_length=50, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -87,13 +85,14 @@ class Instrument(models.Model):
 class Location(models.Model):
     user_pk = models.IntegerField(default=-1)
     location = GeopositionField(blank=True)
-    date_added = models.DateField(auto_now_add=True)
+    description = models.TextField(blank=True)
+    timestamp = models.DateFieldTimeField(auto_now_add=True)
 
     def __str__(self):
         return '{}'.format(self.description)
 
     def get_location(self):
-        # Remember, longitude FIRST!
+        # Remember, longitude FIRST in Geo Django!
         lat = float(self.location.latitude)
         lon = float(self.location.longitude)
         return Point(lon, lat)
@@ -124,8 +123,8 @@ def set_description(sender, instance, created=False, **kwargs):
                 instance.description = address
                 instance.save()
             except:
-                print('......didnt work.......')
-                instance.description = 'Location created on {}'.format(instance.date_added)
+                print('......location post save didnt work.......')
+                instance.description = 'Location created on {}'.format(instance.timestamp)
                 instance.save()
                 pass
 
