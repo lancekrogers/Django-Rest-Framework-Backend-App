@@ -1,4 +1,4 @@
-from cleff.choices_list import GENRES
+from choices_list import GENRES
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
@@ -27,6 +27,18 @@ class ProfileModel(models.Model):
             return self.profile_image.url
         else:
             pass
+
+    def get_location(self):
+        # Remember, longitude FIRST in Geo Django!
+        try:
+            lat = float(self.current_location.latitude)
+            lon = float(self.current_location.longitude)
+            return Point(lon, lat)
+        except:
+            # coordinates for Antartica
+            lat = 90.0000
+            lon = 0.0000
+            return Point(lon, lat)
 
     class Meta:
         abstract = True
@@ -86,7 +98,7 @@ class Location(models.Model):
     user_pk = models.IntegerField(default=-1)
     location = GeopositionField(blank=True)
     description = models.TextField(blank=True)
-    timestamp = models.DateFieldTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return '{}'.format(self.description)

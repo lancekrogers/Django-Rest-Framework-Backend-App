@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'profiles',
     'geoposition',
+    'haystack',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -65,6 +66,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.core.context_processors.media',
+
             ],
         },
     },
@@ -104,15 +107,27 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = os.path.join(BASE_DIR, '/static/')
+
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
-
 
 MEDIA_ROOT = os.path.join(BASE_DIR,
                           "static/media")
 MEDIA_URL = '/media/'
 
 
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://127.0.0.1:9200/',
+        'INDEX_NAME': 'haystack',
+        'INCLUDE_SPELLING': 'False',
+    },
+}
 
-STATIC_ROOT = os.path.join(BASE_DIR, '/static/')
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+
+
