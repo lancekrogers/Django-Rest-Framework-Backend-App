@@ -1,4 +1,4 @@
-from choices_list import GENRES
+from .choices_list import GENRES
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
@@ -13,13 +13,13 @@ from django.contrib.gis.geos import Point
 class ProfileModel(models.Model):
     user = models.OneToOneField(User, primary_key=True)
     email = models.EmailField(blank=True)
-    first_name = models.CharField(max_length=15, blank=True)
-    last_name = models.CharField(max_length=15, blank=True)
+    first_name = models.CharField(max_length=40, blank=True)
+    last_name = models.CharField(max_length=40, blank=True)
     profile_image = models.ImageField(upload_to='profile_image/%Y/%m/%d', blank=True)
     locations = models.ManyToManyField('Location', blank=True)
     current_location = GeopositionField(blank=True)  # comrades are the matched users
     is_musician = models.BooleanField(default=False)  # the more times a comrade with the same user_pk
-    search_range = models.IntegerField(default=50)  #
+    search_range = models.IntegerField(default=30)  #
     comrades = models.ManyToManyField('Comrade', blank=True)  #
 
     def profile_image_func(self):
@@ -49,7 +49,7 @@ class Musician(ProfileModel):
     summary = models.TextField(blank=True)
     company = models.CharField(max_length=60, blank=True)
     media = models.ManyToManyField('Media', blank=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True, blank=True)
     instruments = models.ManyToManyField('Instrument', blank=True)
     friends = models.ManyToManyField('SavedMusician', blank=True)
 
@@ -65,7 +65,7 @@ class Genre(models.Model):
     user_pk = models.IntegerField(default=-1)
     genre = models.CharField(choices=GENRES, max_length=20)
     description = models.CharField(max_length=140, blank=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True, blank=True)
 
     def __str__(self):
         return '{} {}'.format(self.genre, self.description)
@@ -74,7 +74,7 @@ class Genre(models.Model):
 class Media(models.Model):
     user_pk = models.IntegerField(default=-1)
     title = models.CharField(max_length=20)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True, blank=True)
     youtube_code = models.CharField(max_length=20, blank=True)
     audio = models.FileField(upload_to='audio/%Y/%m/%d/{}'.format('sound'), blank=True)
 
@@ -87,18 +87,19 @@ class Media(models.Model):
 
 class Instrument(models.Model):
     user_pk = models.IntegerField(default=-1)
-    description = models.CharField(max_length=50, blank=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(max_length=30, blank=True)
+    description = models.CharField(max_length=100, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True, blank=True)
 
     def __str__(self):
-        return '{} {}'.format(self.family, self.description)
+        return '{} {}'.format(self.description)
 
 
 class Location(models.Model):
     user_pk = models.IntegerField(default=-1)
     location = GeopositionField(blank=True)
     description = models.TextField(blank=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True, blank=True)
 
     def __str__(self):
         return '{}'.format(self.description)
@@ -144,7 +145,7 @@ def set_description(sender, instance, created=False, **kwargs):
 class SavedMusician(models.Model):
     numbre = models.IntegerField()
     saver_musician = models.ForeignKey(Musician, blank=True, null=True)
-    date_stamp = models.DateField(auto_now_add=True)
+    date_stamp = models.DateTimeField(auto_now_add=True, blank=True)
 
     def __str__(self):
         return "{}".format(Musician.objects.get(pk=self.numbre))
@@ -152,7 +153,7 @@ class SavedMusician(models.Model):
 
 class Comrade(models.Model):
     numbre = models.OneToOneField(SavedMusician, blank=True, primary_key=True)
-    date_stamp = models.DateField(auto_now_add=True)
+    date_stamp = models.DateTimeField(auto_now_add=True, blank=True)
 
     def __str__(self):
         return 'Comrade {}'.format(Musician.objects.get(pk=self.numbre.numbre))
