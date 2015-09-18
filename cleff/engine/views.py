@@ -71,4 +71,4 @@ def update_comrades_view(request):
                             user.comrades.remove(co)
                 else:
                     pass
-            return JsonResponse({'ComradesUpdate': 'Success'})
+            return HttpResponse('success', status=200)

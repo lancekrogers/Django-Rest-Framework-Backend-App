@@ -6,6 +6,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
+
+
+
+{% if request.user.musician %}
+<script>
+
+
+
+function initGeolocation() {
+    if (navigator && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+        } else {
+            console.log('Geolocation is not supported');
+        }
+}
+function errorCallback() {}
+function successCallback(position) {
+    var lat = position.coords.latitude.toString();
+    var long = position.coords.longitude.toString();
+    var coordinates = lat + ',' + long;
+    console.log(coordinates);
+    var coords = document.getElementById('coordinates');
+    coords.value = coordinates;
+	var csrftoken = Cookies.get('csrftoken');
+    $.ajax({
+        url: "{% url 'engine:update_comrades' %}",
+        type: 'POST',
+        data: {
+            coordinates: coordinates,
+            csrfmiddlewaretoken: csrftoken,
+        }
+    });
+
+}
+
+</script>
+
+{% endif %}
+
+<script>
     <!-- Favicon <link rel="shortcut icon" href="assets/ico/favicon.png"> -->
 
     <title>Cleff Now Under Development</title>
