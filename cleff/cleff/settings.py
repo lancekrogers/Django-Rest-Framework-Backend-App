@@ -41,6 +41,9 @@ INSTALLED_APPS = (
     'geoposition',
     'haystack',
     'preapplanding',
+    'engine',
+    'rest_framework',
+    'rest_framework.authtoken',
 )
 
 MIDDLEWARE_CLASSES = (
