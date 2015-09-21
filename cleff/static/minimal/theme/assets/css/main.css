@@ -38,7 +38,7 @@ p {
 
 /* Links */
 a {
-    color: #f85c37;
+    color: #c4e3f3;
     word-wrap: break-word;
 
     -webkit-transition: color 0.1s ease-in, background 0.1s ease-in;
@@ -79,7 +79,7 @@ a:after {
    ========================================================================== */
 
 #headerwrap {
-	background: url(../img/header-bg.jpg) no-repeat center top;
+	background: url(../img/dark.jpg) no-repeat center top;
 	margin-top: -10px;
 	padding-top:20px;
 	text-align:center;
@@ -100,9 +100,9 @@ a:after {
 }
 
 #headerwrap h1 {
-	margin-top: 150px;
+	margin-top: 2.375em;
 	color: white;
-	font-size: 70px;
+	font-size: 4.375em;
 	font-weight: 700;
 }
 
@@ -190,7 +190,7 @@ a:after {
 }
 
 .menu h1.logo a:hover {
-	color: #f85c37;
+	color: black;
 }
 
 .menu img.logo {

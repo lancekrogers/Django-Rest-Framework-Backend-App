@@ -16,11 +16,11 @@ def update_comrades_view(request):
             user = request.user.musician
             user.current_location = cor_data
             user.save()
-            loca = Location.objects.create(
-                user_pk=user.pk,
-                location=cor_data,
-            )
-            loca.save()
+            #loca = Location.objects.create(
+             #   user_pk=user.pk,
+              #  location=cor_data,
+            #)
+            #loca.save()
             coor = user.current_location
             lat = float(coor.latitude)
             lon = float(coor.longitude)
@@ -31,6 +31,7 @@ def update_comrades_view(request):
                 'location',
                 current_location,
                 max_dist)
+            print(loc_match)
             com_list = []
             if len(loc_match) > 0:
                 for obj in loc_match:
