@@ -1,4 +1,4 @@
-from cleff.profiles.models import Musician, Location, SavedMusician, Comrade
+from profiles.models import Musician, Location, SavedMusician, Comrade
 from django.contrib.gis.geos import Point
 from django.http import HttpResponse, JsonResponse
 from haystack.query import SearchQuerySet

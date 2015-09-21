@@ -20,5 +20,5 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^profiles/', include('profiles.urls', namespace='profiles')),
     url(r'^', include('preapplanding.urls', namespace='preapplanding')),
-    url(r'^engine/', include('engine', namespace='engine')),
+    url(r'^engine/', include('engine.urls', namespace='engine')),
 ]

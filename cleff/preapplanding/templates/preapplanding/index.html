@@ -1,17 +1,21 @@
-{% load static from staticfiles %}
 <!DOCTYPE html>
+
+{% load static from staticfiles %}
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
+   	<!-- ajax library cdn -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
 
 
 
 {% if request.user.musician %}
 <script>
-
 
 
 function initGeolocation() {
@@ -29,26 +33,25 @@ function successCallback(position) {
     console.log(coordinates);
     var coords = document.getElementById('coordinates');
     coords.value = coordinates;
-	var csrftoken = Cookies.get('csrftoken');
     $.ajax({
         url: "{% url 'engine:update_comrades' %}",
         type: 'POST',
         data: {
             coordinates: coordinates,
-            csrfmiddlewaretoken: csrftoken,
+            csrfmiddlewaretoken: '{{ csrf_token }}',
         }
     });
 
 }
 
+
+
 </script>
 
 {% endif %}
 
-<script>
-    <!-- Favicon <link rel="shortcut icon" href="assets/ico/favicon.png"> -->
 
-    <title>Cleff Now Under Development</title>
+<title>Cleff Now Under Development</title>
 
     <!-- Bootstrap core CSS -->
     <link href="{% static 'minimal/theme/assets/css/bootstrap.css' %}" rel="stylesheet">
@@ -71,9 +74,12 @@ function successCallback(position) {
       <script src="{% static 'minimal/theme/assets/js/respond.min.js' %}"></script>
     <![endif]-->
   </head>
+  {% if request.user.musician %}
+  <body onload="javascript:initGeolocation()" data-spy="scroll" data-offset="0" data-target="#theMenu">
+  {% else %}
+    <body data-spy="scroll" data-offset="0" data-target="#theMenu">
 
-  <body data-spy="scroll" data-offset="0" data-target="#theMenu">
-		
+  {% endif %}
 	<!-- Menu -->
 	<nav class="menu" id="theMenu">
 		<div class="menu-wrap">
@@ -88,7 +94,7 @@ function successCallback(position) {
 			<a href="#"><i class="icon-dribbble"></i></a>
 			<a href="#"><i class="icon-envelope"></i></a>
 		</div>
-		
+
 		<!-- Menu button -->
 		<div id="menuToggle"><i class="icon-reorder"></i></div>
 	</nav>
@@ -194,9 +200,9 @@ function successCallback(position) {
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-	<script src="../../../static/minimal/theme/assets/js/classie.js"></script>
-    <script src="../../../static/minimal/theme/assets/js/bootstrap.min.js"></script>
-    <script src="../../../static/minimal/theme/assets/js/smoothscroll.js"></script>
-	<script src="../../../static/minimal/theme/assets/js/main.js"></script>
+	<script src="{% static 'minimal/theme/assets/js/classie.js' %}"></script>
+    <script src="{% static 'minimal/theme/assets/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'minimal/theme/assets/js/smoothscroll.js' %}"></script>
+	<script src="{% static 'minimal/theme/assets/js/main.js' %}"></script>
 </body>
 </html>
