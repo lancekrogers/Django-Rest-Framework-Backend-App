@@ -61,8 +61,7 @@ function successCallback(position) {
 	<link rel="stylesheet" href="{% static 'minimal/theme/assets/css/font-awesome.min.css' %}">
 
     <script src="{% static 'minimal/theme/assets/js/jquery.min.js' %}"></script>
-	<script src="{% static 'minimal/theme/assets/js/modernizr.custom.js' %}"></script>
-	
+
 
 	
     <link href='http://fonts.googleapis.com/css?family=Oswald:400,300,700' rel='stylesheet' type='text/css'>
@@ -76,6 +75,13 @@ function successCallback(position) {
   </head>
   {% if request.user.musician %}
   <body onload="javascript:initGeolocation()" data-spy="scroll" data-offset="0" data-target="#theMenu">
+	<!-- Ajax form start -->
+  	<form action="{% url 'engine:update_comrades' %}" method="POST" id="position_form" >
+       {% csrf_token %}
+        <label>
+            <input name="position" type="hidden" id="coordinates">
+        </label>
+	</form> <!-- Ajax form end -->
   {% else %}
     <body data-spy="scroll" data-offset="0" data-target="#theMenu">
 
@@ -187,9 +193,8 @@ function successCallback(position) {
 				<p class="centered"><i class="icon icon-circle"></i><i class="icon icon-circle"></i><i class="icon icon-circle"></i></p>
 				
 				<div class="col-lg-6 col-lg-offset-3">
-					<p>Some Avenue, 987<br/>Madrid, Spain<br/>+34 8984-4343</p>
-					<p>iam@awesomemail.com</p>
-					<p><button type="button" class="btn btn-warning">YEAH! CONTACT ME NOW!</button></p>
+					<p>cleffapp@gmail.com</p>
+					<p><button type="button" class="btn btn-warning">Email with any questions, suggestions or if you want to help! </button></p>
 				</div>
 			</div>
 		</div>
