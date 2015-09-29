@@ -11,8 +11,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
+        migrations.AlterField(
             model_name='musician',
             name='email',
+            field=models.EmailField(blank=True, max_length=254, unique=True),
         ),
     ]

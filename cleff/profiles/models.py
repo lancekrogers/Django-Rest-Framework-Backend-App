@@ -7,11 +7,13 @@ from PIL import Image  # this is needed for the models.ImageField to work
 from geoposition.fields import GeopositionField
 from geopy.geocoders import Nominatim
 from django.contrib.gis.geos import Point
+from django.utils.translation import ugettext_lazy as _
 # Create your models here.
 
 # An Abstract Base User Model
 class ProfileModel(models.Model):
     user = models.OneToOneField(User, primary_key=True)
+    email = models.EmailField(blank=True, unique=True)
     first_name = models.CharField(max_length=40, blank=True)
     last_name = models.CharField(max_length=40, blank=True)
     profile_image = models.ImageField(upload_to='profile_image/%Y/%m/%d', blank=True)
