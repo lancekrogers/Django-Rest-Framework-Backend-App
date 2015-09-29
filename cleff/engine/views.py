@@ -16,11 +16,6 @@ def update_comrades_view(request):
             user = request.user.musician
             user.current_location = cor_data
             user.save()
-            #loca = Location.objects.create(
-             #   user_pk=user.pk,
-              #  location=cor_data,
-            #)
-            #loca.save()
             coor = user.current_location
             lat = float(coor.latitude)
             lon = float(coor.longitude)

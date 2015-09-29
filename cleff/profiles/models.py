@@ -12,7 +12,6 @@ from django.contrib.gis.geos import Point
 # An Abstract Base User Model
 class ProfileModel(models.Model):
     user = models.OneToOneField(User, primary_key=True)
-    email = models.EmailField(blank=True)
     first_name = models.CharField(max_length=40, blank=True)
     last_name = models.CharField(max_length=40, blank=True)
     profile_image = models.ImageField(upload_to='profile_image/%Y/%m/%d', blank=True)
@@ -43,7 +42,7 @@ class ProfileModel(models.Model):
     class Meta:
         abstract = True
 
-# The main user model
+# The main user profile model
 class Musician(ProfileModel):
     genres = models.ManyToManyField('Genre', blank=True)
     summary = models.TextField(blank=True)
