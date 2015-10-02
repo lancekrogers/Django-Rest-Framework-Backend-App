@@ -23,6 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    genre = serializers.ChoiceField(choices=GENRES)
 
     class Meta:
         model = Genre

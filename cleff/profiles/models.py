@@ -71,6 +71,9 @@ class Genre(models.Model):
     def __str__(self):
         return '{} {}'.format(self.genre, self.description)
 
+    class Meta:
+        ordering = ['timestamp']
+
 
 class Media(models.Model):
     user_pk = models.IntegerField(default=-1)
