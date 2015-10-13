@@ -1,5 +1,5 @@
 from .models import Genre
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from .serializers import UserSerializer, GenreSerializer
 from django.contrib.auth.models import User
@@ -46,13 +46,44 @@ def genre_create_api(request):
         return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
 
 
-def get_genres_by_user(request, pk):
-    this = pk
-    if request.method == 'GET':
-        genres = Genre.objects.filter(user_pk=this)
-        for genre in genres:
-            return JsonResponse(genres, safe=False)
-    else:
-        return HttpResponse('NOT ALLOWED')
+class GenreList(APIView):
+    """
+    returns a list of all genres
+
+    """
+
+    def get(self, request, format=None):
+        genres = Genre.objects.all()
+        serializer = GenreSerializer(genres, many=True)
+        return Response(serializer.data)
 
 
+class GenreDetail(APIView):
+    """
+    retrieve update or delete a genre
+
+    """
+
+    def get_object(self, pk):
+        try:
+            return Genre.objects.get(pk=pk)
+        except Genre.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        genre = self.get_object(pk)
+        serializer = GenreSerializer(genre)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        genre = self.get_object(pk)
+        serializer = GenreSerializer(genre, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        genre = self.get_object(pk)
+        genre.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
