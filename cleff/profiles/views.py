@@ -1,7 +1,7 @@
-from .models import Genre
+from .models import Genre, Media
 from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
-from .serializers import UserSerializer, GenreSerializer
+from .serializers import UserSerializer, GenreSerializer, MediaSerializer
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from rest_framework import serializers
@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.core import serializers as serial2
 from rest_framework.views import APIView
-from rest_framework import authentication, permissions
+from rest_framework import authentication, permissions, generics
 
 # Create your views here.
 
@@ -46,20 +46,9 @@ def genre_create_api(request):
         return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
 
 
-class GenreList(APIView):
-    """
-    returns a list of all genres
-
-    """
-
-    def get(self, request, format=None):
-        genres = Genre.objects.all()
-        serializer = GenreSerializer(genres, many=True)
-        return Response(serializer.data)
-
-
 class GenreDetail(APIView):
     """
+
     retrieve update or delete a genre
 
     """
@@ -87,3 +76,34 @@ class GenreDetail(APIView):
         genre = self.get_object(pk)
         genre.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class MediaDetail(APIView):
+
+    def get_object(self, pk):
+        try:
+            return Media.objects.get(pk=pk)
+        except Media.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        media = self.get_object(pk)
+        serializer = MediaSerializer(media)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        media = self.get_object(pk)
+        serializer = MediaSerializer(media, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        media = self.get_object(pk)
+        media.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class MediaCreate(generics.ListCreateAPIView):
+    queryset = Media.objects.all()
+    serializer_class = MediaSerializer
