@@ -5,3 +5,7 @@ from django.shortcuts import render
 
 def landing(request):
     return render(request, 'preapplanding/index.html')
+
+
+def test(request):
+    return render(request, 'test/test.html')

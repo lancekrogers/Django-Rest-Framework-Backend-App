@@ -15,10 +15,20 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.conf import settings
+
+from django.conf.urls.static import static
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^profiles/', include('profiles.urls', namespace='profiles')),
-    url(r'^', include('preapplanding.urls', namespace='preapplanding')),
-    url(r'^engine/', include('engine.urls', namespace='engine')),
-]
+    url(r'^admin/',
+        include(admin.site.urls)),
+    url(r'^profiles/',
+        include('profiles.urls',
+                namespace='profiles')),
+    url(r'^',
+        include('preapplanding.urls',
+                namespace='preapplanding')),
+    url(r'^engine/',
+        include('engine.urls',
+                namespace='engine')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

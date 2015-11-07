@@ -108,4 +108,3 @@ class MediaCreate(generics.ListCreateAPIView):
     queryset = Media.objects.all()
     serializer_class = MediaSerializer
 
-

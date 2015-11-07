@@ -25,7 +25,7 @@ SECRET_KEY = '1l!9@hd+9*m^w%wuykuwc)m589e(l-w#*jk-so+pd4y8@6pg7j'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -76,6 +76,8 @@ TEMPLATES = [
         },
     },
 ]
+
+
 
 WSGI_APPLICATION = 'cleff.wsgi.application'
 
