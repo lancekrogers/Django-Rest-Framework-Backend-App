@@ -13,13 +13,14 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        user = User(
+        use_r = User(
             email=validated_data['email'],
             username=validated_data['username']
         )
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
+        use_r.set_password(validated_data['password'])
+        use_r.save()
+        Musician.objects.create(user=use_r, email=validated_data['email'])
+        return use_r
 
 
 class GenreSerializer(serializers.ModelSerializer):

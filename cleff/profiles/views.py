@@ -1,4 +1,4 @@
-from .models import Genre, Media
+from .models import Genre, Media, Musician
 from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from .serializers import UserSerializer, GenreSerializer, MediaSerializer
