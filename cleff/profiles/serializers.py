@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
         use_r.set_password(validated_data['password'])
         use_r.save()
-        Musician.objects.create(user=use_r, email=validated_data['email'])
+        Musician.objects.create(user=use_r, email=validated_data['email'], is_musician=True)
         return use_r
 
 
@@ -45,3 +45,36 @@ class InstrumentSerializer(serializers.ModelSerializer):
         fields = ('user_pk', 'name', 'description')
 
 
+class MusicianProfileUpdateSerializer(serializers.ModelSerializer):
+    genres = serializers.StringRelatedField(many=True)
+    instruments = serializers.StringRelatedField(many=True)
+
+    class Meta:
+        model = Musician
+        fields = ('profile_image',
+                  'summary',
+                  'genres',
+                  'instruments',
+                  'company', )
+
+
+class MusianUpdateSearchRangeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        models = Musician
+        fields = ('search_range',)
+
+class MusicianUpdateFriendsSerializer(serializers.ModelSerializer):
+    friends = serializers.StringRelatedField(many=True)
+
+    class Meta:
+        models = Musician
+        fields = ('friends',)
+
+
+class MusicianMediaSerializer(serializers.ModelSerializer):
+    media = serializers.StringRelatedField(many=True)
+
+    class Meta:
+        models = Musician
+        fields = ('media',)

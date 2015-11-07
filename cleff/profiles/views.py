@@ -108,3 +108,9 @@ class MediaCreate(generics.ListCreateAPIView):
     queryset = Media.objects.all()
     serializer_class = MediaSerializer
 
+
+# To handle many to many fields that need to display, and be deleted by the user
+#
+# you will not be able to use django rest frameworks built in serializers and views.
+#
+# You will also need to build in a security feature for this.
