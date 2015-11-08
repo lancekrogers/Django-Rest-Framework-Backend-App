@@ -7,12 +7,12 @@ from django.contrib.auth import login, authenticate
 
 urlpatterns = [
     url(r'^search/', include('haystack.urls')),
-    url(r'^register-user/$', user_creation, name='register'),
-    url(r'^genre-create/$', genre_create_api, name='genres'),
-    url(r'^genre-detail/(?P<pk>[0-9]+)/$', GenreDetail.as_view()),
-    url(r'^media-detail/(?P<pk>[0-9]+)/$', MediaDetail.as_view()),
-    url(r'^media-list-create/$', MediaCreate.as_view()),
-    url(r'^render_comrades/$', render_comrades),
+    url(r'^register/user/$', user_creation, name='register'),
+    url(r'^genre/create/$', genre_create_api, name='genres'),
+    url(r'^genre/detail/(?P<pk>[0-9]+)/$', GenreDetail.as_view()),
+    url(r'^media/detail/(?P<pk>[0-9]+)/$', MediaDetail.as_view()),
+    url(r'^media/list/create/$', MediaCreate.as_view()),
+    url(r'^render/comrades/$', render_comrades),
 ]
 
 

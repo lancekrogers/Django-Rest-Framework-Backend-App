@@ -80,7 +80,7 @@ class GenreDetail(APIView):
         genre.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
+@renderer_classes((JSONRenderer,))
 class MediaDetail(APIView):
 
     def get_object(self, pk):
@@ -91,8 +91,6 @@ class MediaDetail(APIView):
 
     def get(self, request, pk, format=None):
         media = self.get_object(pk)
-        for x in request.user.musician.media:
-            print(x)
         serializer = MediaSerializer(media)
         return Response(serializer.data)
 
@@ -157,18 +155,24 @@ def user_count_view(request, format=None):
 def render_comrades(request):
     context = {}
     print('.......render_comrades .....musician....')
-    visitor = request.user.musician
-    comrades = visitor.comrades.all()
-    musician_list = []
-    media_list = []
-    for com in reversed(comrades):
-        muc = django_serializers.serialize("json", Musician.objects.filter(pk=com.numbre.numbre))
-        musician_list.append(muc)
-        try:
-            media = Musician.objects.filter(pk=com.numbre.numbre).latest_media
-            media_list.append(media)
-        except:
-            pass
-    context['comrades'] = musician_list
-    context['media_list'] = media_list
+    logged_on = False
+    if request.user.is_authenticated():
+        visitor = request.user.musician
+        logged_on = True
+        comrades = visitor.comrades.all()
+        musician_list = []
+        media_list = []
+        for com in reversed(comrades):
+            muc = django_serializers.serialize("json", Musician.objects.filter(pk=com.numbre.numbre))
+            musician_list.append(muc)
+            try:
+                media = Musician.objects.filter(pk=com.numbre.numbre).latest_media
+                media_list.append(media)
+            except:
+                pass
+        context['comrades'] = musician_list
+        context['media_list'] = media_list
+    else:
+        pass
+    context['logged_on'] = logged_on
     return Response(context)
