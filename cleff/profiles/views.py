@@ -1,16 +1,19 @@
+from django.contrib.auth.decorators import login_required
 from .models import Genre, Media, Musician
 from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.renderers import JSONRenderer
 from .serializers import UserSerializer, GenreSerializer, MediaSerializer
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from rest_framework import serializers
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
-from django.core import serializers as serial2
+from django.core import serializers as django_serializers
 from rest_framework.views import APIView
 from rest_framework import authentication, permissions, generics
+
 
 # Create your views here.
 
@@ -88,6 +91,8 @@ class MediaDetail(APIView):
 
     def get(self, request, pk, format=None):
         media = self.get_object(pk)
+        for x in request.user.musician.media:
+            print(x)
         serializer = MediaSerializer(media)
         return Response(serializer.data)
 
@@ -100,8 +105,10 @@ class MediaDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
-        media = self.get_object(pk)
-        media.delete()
+        musician = request.user.musician
+        if request.user.musician.pk == self.user_pk:
+            media = self.get_object(pk)
+            media.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class MediaCreate(generics.ListCreateAPIView):
@@ -114,3 +121,54 @@ class MediaCreate(generics.ListCreateAPIView):
 # you will not be able to use django rest frameworks built in serializers and views.
 #
 # You will also need to build in a security feature for this.
+
+
+
+"""
+@csrf_exempt
+@api_view(['POST'])
+def media_create_api(request):
+    # an api view for the genre model
+    # authentication will be added later alon with all other views
+    if request.method == 'POST':
+        serializer = GenreSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
+"""
+
+@api_view(['GET'])
+@renderer_classes((JSONRenderer,))
+def user_count_view(request, format=None):
+    """
+    A view that returns the count of active users in JSON.
+    """
+    user_count = User.objects.filter(active=True).count()
+    content = {'user_count': user_count}
+    return Response(content)
+
+
+
+@api_view(['GET'])
+@renderer_classes((JSONRenderer,))
+def render_comrades(request):
+    context = {}
+    print('.......render_comrades .....musician....')
+    visitor = request.user.musician
+    comrades = visitor.comrades.all()
+    musician_list = []
+    media_list = []
+    for com in reversed(comrades):
+        muc = django_serializers.serialize("json", Musician.objects.filter(pk=com.numbre.numbre))
+        musician_list.append(muc)
+        try:
+            media = Musician.objects.filter(pk=com.numbre.numbre).latest_media
+            media_list.append(media)
+        except:
+            pass
+    context['comrades'] = musician_list
+    context['media_list'] = media_list
+    return Response(context)

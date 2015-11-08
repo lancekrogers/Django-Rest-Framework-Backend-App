@@ -46,35 +46,20 @@ class InstrumentSerializer(serializers.ModelSerializer):
 
 
 class MusicianProfileUpdateSerializer(serializers.ModelSerializer):
-    genres = serializers.StringRelatedField(many=True)
-    instruments = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = Musician
         fields = ('profile_image',
                   'summary',
-                  'genres',
-                  'instruments',
                   'company', )
 
 
 class MusianUpdateSearchRangeSerializer(serializers.ModelSerializer):
 
     class Meta:
-        models = Musician
+        model = Musician
         fields = ('search_range',)
 
-class MusicianUpdateFriendsSerializer(serializers.ModelSerializer):
-    friends = serializers.StringRelatedField(many=True)
-
-    class Meta:
-        models = Musician
-        fields = ('friends',)
 
 
-class MusicianMediaSerializer(serializers.ModelSerializer):
-    media = serializers.StringRelatedField(many=True)
 
-    class Meta:
-        models = Musician
-        fields = ('media',)

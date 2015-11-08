@@ -1,3 +1,4 @@
+import json
 from .choices_list import GENRES
 from django.contrib.auth.models import User
 from django.db import models
