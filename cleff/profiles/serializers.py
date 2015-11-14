@@ -3,9 +3,9 @@ from rest_framework import serializers
 from .models import Musician, Genre, Media, Instrument
 from .choices_list import GENRES
 
-
 # register
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
 
     class Meta:
         model = User
@@ -13,13 +13,21 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        use_r = User(
-            email=validated_data['email'],
-            username=validated_data['username']
-        )
-        use_r.set_password(validated_data['password'])
-        use_r.save()
-        Musician.objects.create(user=use_r, email=validated_data['email'], is_musician=True)
+        try:
+            use_r = User(
+                email=validated_data['email'],
+                username=validated_data['username']
+            )
+            use_r.set_password(validated_data['password'])
+            use_r.save()
+            Musician.objects.create(user=use_r, email=validated_data['email'], is_musician=True)
+        except:
+            use_r = User(
+                username=validated_data['username']
+            )
+            use_r.set_password(validated_data['password'])
+            use_r.save()
+            Musician.objects.create(user=use_r, is_musician=True)
         return use_r
 
 

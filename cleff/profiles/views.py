@@ -1,3 +1,4 @@
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from .models import Genre, Media, Musician
 from django.http import JsonResponse, HttpResponse, Http404
@@ -5,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
 from .serializers import UserSerializer, GenreSerializer, MediaSerializer
 from django.contrib.auth.models import User
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.decorators import api_view, renderer_classes
@@ -17,7 +18,7 @@ from rest_framework import authentication, permissions, generics
 
 # Create your views here.
 
-
+@renderer_classes((JSONRenderer,))
 @csrf_exempt
 @api_view(['POST'])
 def user_creation(request):
@@ -27,13 +28,41 @@ def user_creation(request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            # print(request.data['email'])
+            try:
+                username = request.data['username']
+                password = request.data['password']
+                user = authenticate(username=username, password=password)
+                login(request, user)
+                data = {'data': serializer.data, 'logged in': True}
+                #return JsonResponse(data=data, status=status.HTTP_201_CREATED)
+                return redirect('profiles:checklogin')
+            except:
+                print('fuck you')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+def check_if_logged_in(request):
+    if request.user.username:
+        try:
+            data = {'username': request.user.username, 'logged in': True}
+            return JsonResponse(data=data, status=status.HTTP_200_OK)
+        except:
+            print(request.user.username)
+            data = {'logged in': False}
+            return JsonResponse(data=data, status=status.HTTP_200_OK)
+    else:
+        data = {'logged in': False}
+        return JsonResponse(data=data, status=status.HTTP_200_OK)
+    return JsonResponse(data=data, status=status.HTTP_200_OK)
 
+
+
+
+
+@renderer_classes((JSONRenderer,))
 @csrf_exempt
 @api_view(['POST'])
 def genre_create_api(request):
@@ -48,7 +77,7 @@ def genre_create_api(request):
     else:
         return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
 
-
+@renderer_classes((JSONRenderer,))
 class GenreDetail(APIView):
     """
 
