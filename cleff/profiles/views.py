@@ -1,3 +1,4 @@
+from cleff.settings import STATIC_URL
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from .models import Genre, Media, Musician
@@ -200,6 +201,11 @@ def user_count_view(request, format=None):
 @api_view(['GET'])
 #@renderer_classes((JSONRenderer,))
 def render_comrades(request):
+    """
+        This is a view that sends a json array of data for use
+        in the main feed.  Two fields in the data contain url of media files.
+        This will be used in source tags for media rendering.
+    """
     context = {}
     print('.......render_comrades .....musician....')
     logged_on = False
@@ -218,17 +224,21 @@ def render_comrades(request):
                # media = musician.latest_media().audio
                 med = musician.media.all()[0]
                 media = {'title': med.title,
-                         'url': med.audio.url}
+                         'url': STATIC_URL[:-1] + med.audio.url}
             else:
                 media = 'NONE'
+            try:
+                profile_img = STATIC_URL[:-1] + musician.profile_image.url
+            except:
+                profile_img = 'NONE'
             musicians = {'username': musician.user.username,
                          'first_name': musician.first_name,
                          'genres': genres,
                          'instruments': instruments,
-                         'media': media
+                         'media': media,
+                         'profile_image': profile_img
 
                          }
-            print(musicians)
             musician_list.append(musicians)
         context['comrades'] = musician_list
     else:
