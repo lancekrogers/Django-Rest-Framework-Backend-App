@@ -213,19 +213,24 @@ def render_comrades(request):
             muc = django_serializers.serialize("json", Musician.objects.filter(pk=com.numbre.numbre))
             musician = Musician.objects.get(pk=com.numbre.numbre)
             genres = [x.genre for x in musician.genres.all()]
+            instruments = [x.name for x in musician.instruments.all()]
+            if musician.media.all()[0]:
+               # media = musician.latest_media().audio
+                med = musician.media.all()[0]
+                media = {'title': med.title,
+                         'url': med.audio.url}
+            else:
+                media = 'NONE'
             musicians = {'username': musician.user.username,
                          'first_name': musician.first_name,
                          'genres': genres,
+                         'instruments': instruments,
+                         'media': media
+
                          }
             print(musicians)
-            musician_list.append(muc)
-            try:
-                media = Musician.objects.filter(pk=com.numbre.numbre).latest_media
-                media_list.append(media)
-            except:
-                pass
+            musician_list.append(musicians)
         context['comrades'] = musician_list
-        context['media_list'] = media_list
     else:
         pass
     context['logged_on'] = logged_on
