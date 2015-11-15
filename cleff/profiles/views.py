@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from .models import Genre, Media, Musician
 from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from .serializers import UserSerializer, GenreSerializer, MediaSerializer
 from django.contrib.auth.models import User
@@ -13,7 +15,8 @@ from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
 from django.core import serializers as django_serializers
 from rest_framework.views import APIView
-from rest_framework import authentication, permissions, generics
+from rest_framework import authentication, permissions, generics, viewsets
+
 
 
 # Create your views here.
@@ -22,6 +25,12 @@ from rest_framework import authentication, permissions, generics
 @csrf_exempt
 @api_view(['POST'])
 def user_creation(request):
+    """
+        This function creates a user and logs them in returning a HTTP 200 OK Response
+        with logged in: True.  To authenticate further use basic authentication.  Look
+        in the music network new folder in your browser for instructions to do this with
+        ajax.
+    """
     # this is a temporary api view for creating users
     # this view will be used until token authentication is in place
     if request.method == 'POST':
@@ -43,8 +52,14 @@ def user_creation(request):
     else:
         return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['GET'])
 def check_if_logged_in(request):
+    """
+        This view is made to check and see weather or not a user is logged in.
+        This is mainly for testing purposes, but is also used by the user_creation_view,
+        so do not edit or remove this view unless you redesign both views.
+    """
     if request.user.username:
         try:
             data = {'username': request.user.username, 'logged in': True}
@@ -57,9 +72,6 @@ def check_if_logged_in(request):
         data = {'logged in': False}
         return JsonResponse(data=data, status=status.HTTP_200_OK)
     return JsonResponse(data=data, status=status.HTTP_200_OK)
-
-
-
 
 
 @renderer_classes((JSONRenderer,))
@@ -77,6 +89,7 @@ def genre_create_api(request):
     else:
         return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
 
+
 @renderer_classes((JSONRenderer,))
 class GenreDetail(APIView):
     """
@@ -84,6 +97,9 @@ class GenreDetail(APIView):
     retrieve update or delete a genre
 
     """
+
+    #authentication_classes = (SessionAuthentication, BasicAuthentication)
+    #permission_classes = (IsAuthenticated,)
 
     def get_object(self, pk):
         try:
@@ -112,6 +128,9 @@ class GenreDetail(APIView):
 @renderer_classes((JSONRenderer,))
 class MediaDetail(APIView):
 
+    #authentication_classes = (SessionAuthentication, BasicAuthentication)
+   # permission_classes = (IsAuthenticated,)
+
     def get_object(self, pk):
         try:
             return Media.objects.get(pk=pk)
@@ -138,7 +157,7 @@ class MediaDetail(APIView):
             media.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class MediaCreate(generics.ListCreateAPIView):
+class MediaListCreate(generics.ListCreateAPIView):
     queryset = Media.objects.all()
     serializer_class = MediaSerializer
 
@@ -178,9 +197,8 @@ def user_count_view(request, format=None):
     return Response(content)
 
 
-
 @api_view(['GET'])
-@renderer_classes((JSONRenderer,))
+#@renderer_classes((JSONRenderer,))
 def render_comrades(request):
     context = {}
     print('.......render_comrades .....musician....')
@@ -193,6 +211,13 @@ def render_comrades(request):
         media_list = []
         for com in reversed(comrades):
             muc = django_serializers.serialize("json", Musician.objects.filter(pk=com.numbre.numbre))
+            musician = Musician.objects.get(pk=com.numbre.numbre)
+            genres = [x.genre for x in musician.genres.all()]
+            musicians = {'username': musician.user.username,
+                         'first_name': musician.first_name,
+                         'genres': genres,
+                         }
+            print(musicians)
             musician_list.append(muc)
             try:
                 media = Musician.objects.filter(pk=com.numbre.numbre).latest_media
@@ -204,4 +229,4 @@ def render_comrades(request):
     else:
         pass
     context['logged_on'] = logged_on
-    return Response(context)
+    return JsonResponse(data=context)#Response(context)
