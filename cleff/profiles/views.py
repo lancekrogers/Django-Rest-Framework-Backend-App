@@ -1,4 +1,5 @@
 from cleff.settings import STATIC_URL
+from .choices_list import GENRES
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from .models import Genre, Media, Musician
@@ -92,41 +93,6 @@ def genre_create_api(request):
 
 
 @renderer_classes((JSONRenderer,))
-class GenreDetail(APIView):
-    """
-
-    retrieve update or delete a genre
-
-    """
-
-    #authentication_classes = (SessionAuthentication, BasicAuthentication)
-    #permission_classes = (IsAuthenticated,)
-
-    def get_object(self, pk):
-        try:
-            return Genre.objects.get(pk=pk)
-        except Genre.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        genre = self.get_object(pk)
-        serializer = GenreSerializer(genre)
-        return Response(serializer.data)
-
-    def put(self, request, pk, format=None):
-        genre = self.get_object(pk)
-        serializer = GenreSerializer(genre, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, format=None):
-        genre = self.get_object(pk)
-        genre.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-@renderer_classes((JSONRenderer,))
 class MediaDetail(APIView):
 
     #authentication_classes = (SessionAuthentication, BasicAuthentication)
@@ -197,7 +163,6 @@ def user_count_view(request, format=None):
     content = {'user_count': user_count}
     return Response(content)
 
-
 @api_view(['GET'])
 #@renderer_classes((JSONRenderer,))
 def render_comrades(request):
@@ -245,3 +210,18 @@ def render_comrades(request):
         pass
     context['logged_on'] = logged_on
     return JsonResponse(data=context)#Response(context)
+
+@api_view(['GET'])
+def genre_choices(request):
+    """
+        This is a view for rendering the genre choices to the user.
+        This will be used by the front end applications to limit the
+        genres a user may choose.
+    """
+    choices = GENRES
+    diction = {}
+    li = []
+    for data in choices:
+        li.append(data[0])
+    diction['GENRE_CHOICES'] = li
+    return JsonResponse(data=diction, status=status.HTTP_200_OK)#, safe=False)
