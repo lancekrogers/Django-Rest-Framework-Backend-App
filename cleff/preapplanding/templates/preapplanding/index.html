@@ -1,8 +1,8 @@
-<!DOCTYPE html>
-<!-- move margin up negative margin top -->
-
-
 {% load static from staticfiles %}
+
+<!DOCTYPE html>
+<!-- move margin up negative margin top 'margin: -1.4em' if there is a white space at the top-->
+
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -75,9 +75,9 @@ function successCallback(position) {
       <script src="{% static 'minimal/theme/assets/js/respond.min.js' %}"></script>
     <![endif]-->
   </head>
-  {% if request.user.musician %}
-  <body onload="javascript:initGeolocation()" data-spy="scroll" data-offset="0" data-target="#theMenu">
-	<!-- Ajax form start -->
+  <body  onload="initGeolocation()" data-spy="scroll" data-offset="0" data-target="#theMenu" style="margin:-1.4em">
+	{% if request.user.musician %}
+  <!-- Ajax form start -->
   	<form action="{% url 'engine:update_comrades' %}" method="POST" id="position_form" >
        {% csrf_token %}
         <label>
@@ -164,13 +164,13 @@ function successCallback(position) {
 						<!-- Wrapper for slides -->
 						<div class="carousel-inner">
 							<div class="item active centered">
-								<img class="img-responsive" src="../../../static/minimal/theme/assets/img/c1.png" alt="">
+								<img class="img-responsive" src="{% static 'minimal/theme/assets/img/c1.png' %}" alt="">
 							</div>
 							<div class="item centered">
-								<img class="img-responsive" src="../../../static/minimal/theme/assets/img/c2.png" alt="">
+								<img class="img-responsive" src="{% static 'minimal/theme/assets/img/c2.png' %}" alt="">
 							</div>
 							<div class="item centered">
-								<img class="img-responsive" src="../../../static/minimal/theme/assets/img/c3.png" alt="">
+								<img class="img-responsive" src="{% static 'minimal/theme/assets/img/c3.png' %}" alt="">
 							</div>
 						</div>
 						<br>

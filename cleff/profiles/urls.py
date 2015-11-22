@@ -1,5 +1,5 @@
-from .views import user_creation, genre_create_api, MediaDetail, MediaListCreate, render_comrades, \
-    check_if_logged_in, genre_choices
+from .views import user_creation, MediaDetail, MediaListCreate, render_comrades, \
+    check_if_logged_in, genre_choices, genre_add_delete_api
 from django.conf.urls import include, url
 from rest_framework.urlpatterns import format_suffix_patterns
 from django.contrib.auth.views import logout
@@ -10,8 +10,8 @@ urlpatterns = [
     url(r'^register/user/$',
         user_creation,
         name='register'),
-    url(r'^genre/create/$',
-        genre_create_api,
+    url(r'^genre/add/$',
+        genre_add_delete_api,
         name='genres'),
     url(r'^genre/choices/$',
         genre_choices),

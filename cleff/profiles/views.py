@@ -213,36 +213,48 @@ def genre_choices(request):
     diction['GENRE_CHOICES'] = li
     return JsonResponse(data=diction, status=status.HTTP_200_OK)#, safe=False)
 
-@api_view(['POST'])
-def genre_add(request):
+@renderer_classes((JSONRenderer,))
+@api_view(['POST', 'DELETE'])
+def genre_add_delete_api(request):
     """
-        This is view for adding a genre to a users genre field.
+        This is view for adding or removing a genre from a users
+        Genres field.
+        To add a Genre send a POST request with the keyword 'Genre' and
+        use the genre choices as a list of choices.
+        To remove a genre send a DELETE request in the same format.
     """
     context = {}
     logged_on = False
     if request.user.is_authenticated():
         visitor = request.user.musician
         logged_on = True
-
+        if request.method == "POST":
+            try:
+                name = request.data['Genre']
+                genre = Genre.objects.get(genre=name)
+                visitor.genres.add(genre)
+                context['Genre'] = genre.genre
+                context['Added'] = True
+            except:
+                context['Genre'] = "Please Select A Genre"
+                context['Added'] = False
+                context['logged_on'] = logged_on
+                return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
+        if request.method == "DELETE":
+            try:
+                name = request.data['Genre']
+                genre = Genre.objects.get(genre=name)
+                visitor.genres.remove(genre)
+                context['Genre'] = genre.genre
+                context['Removed'] = True
+            except:
+                name = request.data['Genre']
+                context['Genre'] = name
+                context['Removed'] = False
+                context['logged_on'] = logged_on
+                return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
     else:
         pass
     context['logged_on'] = logged_on
-    return JsonResponse(data=context)
+    return JsonResponse(data=context, status=status.HTTP_200_OK)
 
-
-@renderer_classes((JSONRenderer,))
-@csrf_exempt
-@api_view(['POST'])
-@authentication_classes((BasicAuthentication,))
-def genre_create_api(request):
-    # an api view for the genre model
-    # authentication will be added later alon with all other views
-    if request.method == 'POST':
-        serializer = GenreSerializer(data=request.data)
-        print(request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
