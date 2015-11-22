@@ -36,7 +36,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = ('user_pk', 'genre', 'description')
+        fields = ('genre',)
 
 
 class MediaSerializer(serializers.ModelSerializer):
@@ -52,7 +52,7 @@ class InstrumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Instrument
-        fields = ('user_pk', 'name', 'description')
+        fields = ('name', )
 
 
 class MusicianProfileUpdateSerializer(serializers.ModelSerializer):

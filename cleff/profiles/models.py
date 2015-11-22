@@ -65,11 +65,10 @@ class Musician(ProfileModel):
 
 class Genre(models.Model):
     genre = models.CharField(choices=GENRES, max_length=20)
-    description = models.CharField(max_length=140, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
 
     def __str__(self):
-        return '{} {}'.format(self.genre, self.description)
+        return '{}'.format(self.genre)
 
     class Meta:
         ordering = ['timestamp']
@@ -90,13 +89,18 @@ class Media(models.Model):
 
 
 class Instrument(models.Model):
-    user_pk = models.IntegerField(default=-1)
-    name = models.CharField(max_length=30, blank=True)
+    rank = models.FloatField(default=0)
+    numerator = models.IntegerField(default=0)
+    denominator = models.IntegerField(default=0)
+    name = models.CharField(max_length=100, blank=True)
     description = models.CharField(max_length=100, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
 
     def __str__(self):
         return '{} {}'.format(self.description)
+
+    class Meta:
+        ordering = ['-rank']
 
 
 class Location(models.Model):

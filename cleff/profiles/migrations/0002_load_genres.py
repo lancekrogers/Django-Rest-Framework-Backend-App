@@ -15,7 +15,7 @@ def populate_genres(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('profiles', '0006_auto_20151122_0104'),
+        ('profiles', '0001_initial'),
     ]
 
     operations = [
