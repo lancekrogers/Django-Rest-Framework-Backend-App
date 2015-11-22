@@ -64,7 +64,6 @@ class Musician(ProfileModel):
 
 
 class Genre(models.Model):
-    user_pk = models.IntegerField(default=-1)
     genre = models.CharField(choices=GENRES, max_length=20)
     description = models.CharField(max_length=140, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)

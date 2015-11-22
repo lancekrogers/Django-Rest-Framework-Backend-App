@@ -13,7 +13,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from rest_framework import serializers
 from rest_framework import status
-from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.decorators import api_view, renderer_classes, authentication_classes
 from rest_framework.response import Response
 from django.core import serializers as django_serializers
 from rest_framework.views import APIView
@@ -77,22 +77,6 @@ def check_if_logged_in(request):
 
 
 @renderer_classes((JSONRenderer,))
-@csrf_exempt
-@api_view(['POST'])
-def genre_create_api(request):
-    # an api view for the genre model
-    # authentication will be added later alon with all other views
-    if request.method == 'POST':
-        serializer = GenreSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
-
-
-@renderer_classes((JSONRenderer,))
 class MediaDetail(APIView):
 
     #authentication_classes = (SessionAuthentication, BasicAuthentication)
@@ -151,17 +135,19 @@ def media_create_api(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
-"""
+
 
 @api_view(['GET'])
 @renderer_classes((JSONRenderer,))
 def user_count_view(request, format=None):
-    """
+
     A view that returns the count of active users in JSON.
-    """
+
     user_count = User.objects.filter(active=True).count()
     content = {'user_count': user_count}
     return Response(content)
+"""
+
 
 @api_view(['GET'])
 #@renderer_classes((JSONRenderer,))
@@ -211,6 +197,7 @@ def render_comrades(request):
     context['logged_on'] = logged_on
     return JsonResponse(data=context)#Response(context)
 
+
 @api_view(['GET'])
 def genre_choices(request):
     """
@@ -225,3 +212,37 @@ def genre_choices(request):
         li.append(data[0])
     diction['GENRE_CHOICES'] = li
     return JsonResponse(data=diction, status=status.HTTP_200_OK)#, safe=False)
+
+@api_view(['POST'])
+def genre_add(request):
+    """
+        This is view for adding a genre to a users genre field.
+    """
+    context = {}
+    logged_on = False
+    if request.user.is_authenticated():
+        visitor = request.user.musician
+        logged_on = True
+
+    else:
+        pass
+    context['logged_on'] = logged_on
+    return JsonResponse(data=context)
+
+
+@renderer_classes((JSONRenderer,))
+@csrf_exempt
+@api_view(['POST'])
+@authentication_classes((BasicAuthentication,))
+def genre_create_api(request):
+    # an api view for the genre model
+    # authentication will be added later alon with all other views
+    if request.method == 'POST':
+        serializer = GenreSerializer(data=request.data)
+        print(request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
