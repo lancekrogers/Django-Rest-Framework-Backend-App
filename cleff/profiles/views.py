@@ -258,3 +258,7 @@ def genre_add_delete_api(request):
     context['logged_on'] = logged_on
     return JsonResponse(data=context, status=status.HTTP_200_OK)
 
+# When you get around to adding the instrument views, use the same technique as the genres,
+#  but add in a ranking system so that you can show a more convenient list of instruments.
+# Do a similar system for adding and removing friends.
+# ##
