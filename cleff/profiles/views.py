@@ -1,8 +1,9 @@
 from cleff.settings import STATIC_URL
-from .choices_list import GENRES
+from .choices_list import GENRES, INSTRUMENT_CLASSES
+from .ranking import update_instrument_rank
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
-from .models import Genre, Media, Musician
+from .models import Genre, Media, Musician, Instrument
 from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -18,7 +19,7 @@ from rest_framework.response import Response
 from django.core import serializers as django_serializers
 from rest_framework.views import APIView
 from rest_framework import authentication, permissions, generics, viewsets
-
+import random
 
 
 # Create your views here.
@@ -262,3 +263,71 @@ def genre_add_delete_api(request):
 #  but add in a ranking system so that you can show a more convenient list of instruments.
 # Do a similar system for adding and removing friends.
 # ##
+
+
+
+@api_view(['GET'])
+def instrument_choices(request):
+    """
+        This is a view for rendering the instrument choices to the user.
+        This will be used by the front end applications to limit the
+        instruments a user may choose. This works slightly different
+        than genre choices.  This renders an ordered list of database table names.
+    """
+    #choices = INSTRUMENT_CLASSES
+    choices = [x.name for x in Instrument.objects.all()]
+    diction = {}
+    li = []
+    for data in choices:
+        li.append(data)
+    diction['INSTRUMENT_CHOICES'] = li
+    return JsonResponse(data=diction, status=status.HTTP_200_OK)
+
+
+@renderer_classes((JSONRenderer,))
+@api_view(['POST', 'DELETE'])
+def instrument_add_delete_api(request):
+    """
+        This is view for adding or removing an instrument from a users
+        instruments field.
+        To add an instrument send a POST request with the keyword 'Instrument' and
+        use the instrument choices as a list of choices.
+        To remove an instrument send a DELETE request in the same format.
+    """
+    context = {}
+    logged_on = False
+    if request.user.is_authenticated():
+        visitor = request.user.musician
+        logged_on = True
+        if request.method == "POST":
+            try:
+                name = request.data['Instrument']
+                instrument = Instrument.objects.get(name=name)
+                visitor.instruments.add(instrument)
+                context['Instrument'] = instrument.name
+                context['Added'] = True
+                instrument.numerator += 100
+                update_instrument_rank(instrument)
+            except:
+                context['Instrument'] = "Please Select An Instrument"
+                context['Added'] = False
+                context['logged_on'] = logged_on
+                return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
+        if request.method == "DELETE":
+            try:
+                name = request.data['Instrument']
+                instrument = Instrument.objects.get(name=name)
+                visitor.instruments.remove(instrument)
+                context['Instrument'] = instrument.name
+                context['Removed'] = True
+                instrument.denominator += 1
+            except:
+                name = request.data['Instrument']
+                context['Instrument'] = name
+                context['Removed'] = False
+                context['logged_on'] = logged_on
+                return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        pass
+    context['logged_on'] = logged_on
+    return JsonResponse(data=context, status=status.HTTP_200_OK)

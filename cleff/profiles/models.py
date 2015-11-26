@@ -91,13 +91,13 @@ class Media(models.Model):
 class Instrument(models.Model):
     rank = models.FloatField(default=0)
     numerator = models.IntegerField(default=0)
-    denominator = models.IntegerField(default=0)
+    denominator = models.IntegerField(default=1)
     name = models.CharField(max_length=100, blank=True)
     description = models.CharField(max_length=100, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
 
     def __str__(self):
-        return '{} {}'.format(self.description)
+        return '{}'.format(self.name)
 
     class Meta:
         ordering = ['-rank']

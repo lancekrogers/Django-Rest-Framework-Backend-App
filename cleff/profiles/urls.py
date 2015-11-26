@@ -1,5 +1,6 @@
 from .views import user_creation, MediaDetail, MediaListCreate, render_comrades, \
-    check_if_logged_in, genre_choices, genre_add_delete_api
+    check_if_logged_in, genre_choices, genre_add_delete_api, instrument_choices, \
+    instrument_add_delete_api
 from django.conf.urls import include, url
 from rest_framework.urlpatterns import format_suffix_patterns
 from django.contrib.auth.views import logout
@@ -10,7 +11,7 @@ urlpatterns = [
     url(r'^register/user/$',
         user_creation,
         name='register'),
-    url(r'^genre/add/$',
+    url(r'^genre/add-or-delete/$',
         genre_add_delete_api,
         name='genres'),
     url(r'^genre/choices/$',
@@ -27,6 +28,10 @@ urlpatterns = [
     url(r'^check/login/$',
         check_if_logged_in,
         name='checklogin'),
+    url(r'^instrument/choices/$',
+        instrument_choices),
+    url(r'^instrument/add-or-delete/$',
+        instrument_add_delete_api),
 ]
 
 
