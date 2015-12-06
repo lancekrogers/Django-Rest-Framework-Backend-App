@@ -7,7 +7,14 @@ from cleff.profiles.models import Musician
 from .models import MusicianMusicianConversation, MusMusMessage
 
 # Create your views here.
-
+from rest_framework.decorators import renderer_classes, api_view
+from rest_framework.renderers import JSONRenderer
+"""
+You need major renovation of this app.  What you need to do is take the conversation starter
+function and the message creation functions and have them be in one api view.  Check to see if
+a conversation exist and if it doesn't then create one, if there is already a converstation take
+them to that conversation and create a new message in that conversation.
+"""
 
 class MusicianMusicianConversationListView(ListView):
     model = MusicianMusicianConversation
@@ -58,26 +65,34 @@ def mm_start_conv(request, receiver_pk):
         print('doesnt work')
         return HttpResponseRedirect(redirection)
 
-
+@renderer_classes((JSONRenderer,))
+@api_view(['POST'])
 def mm_message_create_view(request, conversation_pk, receiver_pk):
-    message_t = request.POST['memo']
-    conv = MusicianMusicianConversation.objects.get(pk=conversation_pk)
-    receiver = Musician.objects.get(pk=receiver_pk)
-    me = request.user.musician
-    if request.method == 'POST':
-        print('mm_message_create POST')
-        mm_message = MusMusMessage.objects.create(
-            sender=me,
-            receiver=receiver,
-            message=message_t
-        )
-        mm_message.save()
-        print('mm_message saved')
-        conv.messages.add(mm_message)
-        conv.save()
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-    return render(request, 'messaging/musicianmusicianconversation_detail.html',
-                  {'message_form': message_t})
+    context = {}
+    logged_on = False
+    if request.user.is_authenticated():
+        sender = request.user.musician()
+        logged_on = True
+        if request.method == 'POST':
+            message_t = request.POST['message']
+            receiver_name = request.POST['reciever']
+            conv = MusicianMusicianConversation.objects.get(pk=conversation_pk)
+            receiver = Musician.objects.get(pk=receiver_pk)
+            me = request.user.musician
+            if request.method == 'POST':
+                print('mm_message_create POST')
+                mm_message = MusMusMessage.objects.create(
+                    sender=me,
+                    receiver=receiver,
+                    message=message_t
+                )
+                mm_message.save()
+                print('mm_message saved')
+                conv.messages.add(mm_message)
+                conv.save()
+                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+            return render(request, 'messaging/musicianmusicianconversation_detail.html',
+                          {'message_form': message_t})
 
 
 def conversation_delete(request, conversation_pk):
