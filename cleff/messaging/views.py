@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -67,7 +68,7 @@ def mm_start_conv(request, receiver_pk):
 
 @renderer_classes((JSONRenderer,))
 @api_view(['POST'])
-def mm_message_create_view(request, conversation_pk, receiver_pk):
+def message_create(request):
     context = {}
     logged_on = False
     if request.user.is_authenticated():
@@ -75,24 +76,34 @@ def mm_message_create_view(request, conversation_pk, receiver_pk):
         logged_on = True
         if request.method == 'POST':
             message_t = request.POST['message']
-            receiver_name = request.POST['reciever']
-            conv = MusicianMusicianConversation.objects.get(pk=conversation_pk)
-            receiver = Musician.objects.get(pk=receiver_pk)
+            reciever_name = request.POST['reciever']
+            r_user = User.objects.get(username=reciever_name)
+            receiver = Musician.objects.get(user=r_user)  # This may or may not work
             me = request.user.musician
-            if request.method == 'POST':
-                print('mm_message_create POST')
-                mm_message = MusMusMessage.objects.create(
-                    sender=me,
-                    receiver=receiver,
-                    message=message_t
-                )
-                mm_message.save()
-                print('mm_message saved')
-                conv.messages.add(mm_message)
-                conv.save()
-                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-            return render(request, 'messaging/musicianmusicianconversation_detail.html',
-                          {'message_form': message_t})
+            mm_message = MusMusMessage.objects.create(
+                sender=me,
+                receiver=receiver,
+                message=message_t
+            )
+            mm_message.save()
+            try:
+                if not MusicianMusicianConversation.objects.get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=reciever, musician_two=me)):
+                    conv = MusicianMusicianConversation.objects.create(musician_one=me, musician_two=receiver)
+                    conv.messages.add(mm_message)
+                    conv.save()
+                    return render(request, context)
+                else:
+                    conv = MusicianMusicianConversation.objects.get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=reciever, musician_two=me))
+                    conv.messages.add(mm_message)
+                    conv.save()
+                    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+            except:
+                print('There is an error in lines 88-92 in your message views')
+
+        else:
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        return render(request, 'messaging/musicianmusicianconversation_detail.html',
+                      {'message_form': message_t})
 
 
 def conversation_delete(request, conversation_pk):
