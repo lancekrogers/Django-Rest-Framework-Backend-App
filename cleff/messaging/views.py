@@ -70,14 +70,21 @@ def mm_start_conv(request, receiver_pk):
 @renderer_classes((JSONRenderer,))
 @api_view(['POST'])
 def message_create(request):
+    """
+    This view is for sending messages.  It looks for existing conversations and if they are
+    not there it creates a conversation and a message.
+    """
+    """
+    :param request:
+    :return:
+    """
     context = {}
     logged_on = False
     if request.user.is_authenticated():
-        sender = request.user.musician()
         logged_on = True
         if request.method == 'POST':
             message_t = request.POST['message']
-            reciever_name = request.POST['reciever']
+            reciever_name = request.POST['reciever_username']
             r_user = User.objects.get(username=reciever_name)
             receiver = Musician.objects.get(user=r_user)  # This may or may not work
             me = request.user.musician
@@ -110,6 +117,8 @@ def message_create(request):
     return JsonResponse(data=context, status=status.HTTP_200_OK)
 
 
+@renderer_classes((JSONRenderer,))
+@api_view(['DELETE'])
 def conversation_delete(request, conversation_pk):
     if request.POST:
         instance = MusicianMusicianConversation.objects.get(pk=conversation_pk)
