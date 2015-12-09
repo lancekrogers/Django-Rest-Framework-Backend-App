@@ -124,6 +124,7 @@ def conversation_delete(request):
     logged_on = False
     context['logged_on'] = logged_on
     if request.user.musician:
+        logged_on = True
         try:
             sender = request.data['Sender']
             receiver = request.data['Receiver']
@@ -134,7 +135,6 @@ def conversation_delete(request):
                 context['conversation'] = instance
                 instance.delete()
                 deleted = True
-
                 return JsonResponse(data=context, status=status.HTTP_202_ACCEPTED)
         except:
             context['error'] = 'Please submit a sender and receiver'
