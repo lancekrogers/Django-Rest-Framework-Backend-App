@@ -1,13 +1,14 @@
 from django.contrib.auth.models import User
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView, DeleteView
 
-from cleff.profiles.models import Musician
+from profiles.models import Musician
 from .models import MusicianMusicianConversation, MusMusMessage
 
 # Create your views here.
+from rest_framework import status
 from rest_framework.decorators import renderer_classes, api_view
 from rest_framework.renderers import JSONRenderer
 """
@@ -87,23 +88,26 @@ def message_create(request):
             )
             mm_message.save()
             try:
-                if not MusicianMusicianConversation.objects.get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=reciever, musician_two=me)):
+                if not MusicianMusicianConversation.objects.get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=receiver, musician_two=me)):
                     conv = MusicianMusicianConversation.objects.create(musician_one=me, musician_two=receiver)
                     conv.messages.add(mm_message)
                     conv.save()
                     return render(request, context)
                 else:
-                    conv = MusicianMusicianConversation.objects.get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=reciever, musician_two=me))
+                    conv = MusicianMusicianConversation.objects.get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=receiver, musician_two=me))
                     conv.messages.add(mm_message)
                     conv.save()
                     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
             except:
-                print('There is an error in lines 88-92 in your message views')
+                context['error'] = 'There is an error in lines 88-92 in your message views'
+                context['logged_on'] = logged_on
+                return JsonResponse(data=context, status=status.HTTP_403_FORBIDDEN)
 
         else:
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        return render(request, 'messaging/musicianmusicianconversation_detail.html',
-                      {'message_form': message_t})
+            context['logged_on'] = logged_on
+            return JsonResponse(data=context, status=status.HTTP_403_FORBIDDEN)
+    context['logged_on'] = logged_on
+    return JsonResponse(data=context, status=status.HTTP_200_OK)
 
 
 def conversation_delete(request, conversation_pk):

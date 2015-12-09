@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'engine',
     'rest_framework',
     'rest_framework.authtoken',
+    'messaging',
 )
 
 MIDDLEWARE_CLASSES = (

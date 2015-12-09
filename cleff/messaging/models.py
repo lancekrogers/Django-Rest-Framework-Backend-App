@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from cleff.profiles.models import Musician
+from profiles.models import Musician
 
 # Create your models here.
 
