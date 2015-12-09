@@ -42,30 +42,6 @@ class MusicianMusicianConversationDetailView(DetailView):
         return MusicianMusicianConversation.messages
 
 
-def mm_start_conv(request, receiver_pk):
-    me = Musician.objects.get(pk=request.user.pk)
-    print(me)
-    other = Musician.objects.get(pk=receiver_pk)
-    print(other)
-    redirection = request.META.get('HTTP_REFERER')
-    if request.method == 'POST':
-        print('post mm_start_conv')
-        if not MusicianMusicianConversation.objects.filter(Q(musician_one=me, musician_two=other) |
-                                                           Q(musician_one=other, musician_two=me)):
-            obj = MusicianMusicianConversation.objects.create(
-                initializer=me,
-                musician_one=me,
-                musician_two=other,
-            )
-            obj.save()
-            return redirect('message:musician_conv_detail_view', obj.pk)
-        else:
-            obj = MusicianMusicianConversation.objects.get(Q(musician_one=me, musician_two=other) |
-                                                           Q(musician_one=other, musician_two=me))
-            return redirect('message:musician_conv_detail_view', obj.pk)
-    else:
-        print('doesnt work')
-        return HttpResponseRedirect(redirection)
 
 # After the message is created add a "link" to the conversation
 # This may be implemented only on the front end, but possibly on the
