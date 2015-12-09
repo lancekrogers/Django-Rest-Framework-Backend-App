@@ -67,16 +67,15 @@ def mm_start_conv(request, receiver_pk):
         print('doesnt work')
         return HttpResponseRedirect(redirection)
 
+# After the message is created add a "link" to the conversation
+# This may be implemented only on the front end, but possibly on the
+# back end after implementation is figured out.
 @renderer_classes((JSONRenderer,))
 @api_view(['POST'])
 def message_create(request):
     """
     This view is for sending messages.  It looks for existing conversations and if they are
     not there it creates a conversation and a message.
-    """
-    """
-    :param request:
-    :return:
     """
     context = {}
     logged_on = False
