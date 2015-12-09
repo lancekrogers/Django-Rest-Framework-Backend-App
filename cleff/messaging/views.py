@@ -82,8 +82,8 @@ def message_create(request):
     if request.user.is_authenticated():
         logged_on = True
         if request.method == 'POST':
-            message_t = request.POST['message']
-            reciever_name = request.POST['reciever_username']
+            message_t = request.data['message']
+            reciever_name = request.data['reciever_username']
             r_user = User.objects.get(username=reciever_name)
             receiver = Musician.objects.get(user=r_user)  # This may or may not work
             me = request.user.musician
@@ -118,8 +118,26 @@ def message_create(request):
 
 @renderer_classes((JSONRenderer,))
 @api_view(['DELETE'])
-def conversation_delete(request, conversation_pk):
-    if request.POST:
-        instance = MusicianMusicianConversation.objects.get(pk=conversation_pk)
-        instance.delete()
-        return redirect('message:musician_conversations')
+def conversation_delete(request):
+    context = {}
+    deleted = False
+    logged_on = False
+    context['logged_on'] = logged_on
+    if request.user.musician:
+        try:
+            sender = request.data['Sender']
+            receiver = request.data['Receiver']
+            context['deleted'] = deleted
+            if request.method == 'DELETE':
+                instance = MusicianMusicianConversation.objects.get(Q(musician_one=sender,
+                                                                      musician_two=receiver) | Q(musician_one=receiver, musician_two=sender))
+                context['conversation'] = instance
+                instance.delete()
+                deleted = True
+
+                return JsonResponse(data=context, status=status.HTTP_202_ACCEPTED)
+        except:
+            context['error'] = 'Please submit a sender and receiver'
+            return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
