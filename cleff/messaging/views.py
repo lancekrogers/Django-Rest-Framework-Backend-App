@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView, DeleteView
 
 from profiles.models import Musician
-from .models import MusicianMusicianConversation, MusMusMessage
+from .models import TheConversation, Message
 
 # Create your views here.
 from rest_framework import status
@@ -19,27 +19,27 @@ them to that conversation and create a new message in that conversation.
 """
 
 class MusicianMusicianConversationListView(ListView):
-    model = MusicianMusicianConversation
+    model = TheConversation
 
     def owner_is_musician_one(self):
         owner = Musician.objects.get(pk=self.request.user.pk)
-        return MusicianMusicianConversation.objects.filter(musician_one=owner)
+        return TheConversation.objects.filter(musician_one=owner)
 
     def owner_is_musician_two(self):
         owner = Musician.objects.get(pk=self.request.user.pk)
-        return MusicianMusicianConversation.objects.filter(musician_two=owner)
+        return TheConversation.objects.filter(musician_two=owner)
 
     def get_queryset(self):
         profile = Musician.objects.get(user=self.request.user)
-        return MusicianMusicianConversation.objects.filter(Q(musician_one=profile) | Q(musician_two=profile))
+        return TheConversation.objects.filter(Q(musician_one=profile) | Q(musician_two=profile))
 
 
 class MusicianMusicianConversationDetailView(DetailView):
-    model = MusicianMusicianConversation
+    model = TheConversation
     fields = ['messages']
 
     def list_of_messages(self):
-        return MusicianMusicianConversation.messages
+        return TheConversation.messages
 
 
 
@@ -63,20 +63,20 @@ def message_create(request):
             r_user = User.objects.get(username=reciever_name)
             receiver = Musician.objects.get(user=r_user)  # This may or may not work
             me = request.user.musician
-            mm_message = MusMusMessage.objects.create(
+            mm_message = Message.objects.create(
                 sender=me,
                 receiver=receiver,
                 message=message_t
             )
             mm_message.save()
             try:
-                if not MusicianMusicianConversation.objects.get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=receiver, musician_two=me)):
-                    conv = MusicianMusicianConversation.objects.create(musician_one=me, musician_two=receiver)
+                if not TheConversation.objects.get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=receiver, musician_two=me)):
+                    conv = TheConversation.objects.create(musician_one=me, musician_two=receiver)
                     conv.messages.add(mm_message)
                     conv.save()
                     return render(request, context)
                 else:
-                    conv = MusicianMusicianConversation.objects.get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=receiver, musician_two=me))
+                    conv = TheConversation.objects.get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=receiver, musician_two=me))
                     conv.messages.add(mm_message)
                     conv.save()
                     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
@@ -99,18 +99,19 @@ def conversation_delete(request):
     deleted = False
     logged_on = False
     context['logged_on'] = logged_on
-    if request.user.musician:
+    if request.user.is_authenticated():
         logged_on = True
         try:
             sender = request.data['Sender']
             receiver = request.data['Receiver']
             context['deleted'] = deleted
             if request.method == 'DELETE':
-                instance = MusicianMusicianConversation.objects.get(Q(musician_one=sender,
+                instance = TheConversation.objects.get(Q(musician_one=sender,
                                                                       musician_two=receiver) | Q(musician_one=receiver, musician_two=sender))
                 context['conversation'] = instance
                 instance.delete()
                 deleted = True
+                context['deleted'] = deleted
                 return JsonResponse(data=context, status=status.HTTP_202_ACCEPTED)
         except:
             context['error'] = 'Please submit a sender and receiver'

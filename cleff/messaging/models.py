@@ -5,11 +5,11 @@ from profiles.models import Musician
 # Create your models here.
 
 
-class MusicianMusicianConversation(models.Model):
+class TheConversation(models.Model):
     initializer = models.ForeignKey(Musician, related_name='initializer')
     musician_one = models.ForeignKey(Musician, related_name='musician_one')
     musician_two = models.ForeignKey(Musician, related_name='musician_two')
-    messages = models.ManyToManyField('MusMusMessage', blank=True)
+    messages = models.ManyToManyField('Message', blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -19,9 +19,9 @@ class MusicianMusicianConversation(models.Model):
         return 'conversation between {} and {}'.format(self.musician_one, self.musician_two)
 
 
-class MusMusMessage(models.Model):
+class Message(models.Model):
     message = models.TextField()
-    conversation = models.ManyToManyField(MusicianMusicianConversation)
+    conversation = models.ManyToManyField(TheConversation)
     sender = models.ForeignKey(Musician, related_name='sender')
     receiver = models.ForeignKey(Musician, related_name='receiver')
     timestamp = models.DateTimeField(auto_now_add=True)
