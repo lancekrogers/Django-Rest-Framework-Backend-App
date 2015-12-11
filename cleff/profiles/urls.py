@@ -1,6 +1,6 @@
 from .views import user_creation, MediaDetail, MediaListCreate, render_comrades, \
     check_if_logged_in, genre_choices, genre_add_delete_api, instrument_choices, \
-    instrument_add_delete_api
+    instrument_add_delete_api, login_account, logout_account
 from django.conf.urls import include, url
 from rest_framework.urlpatterns import format_suffix_patterns
 from django.contrib.auth.views import logout
@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'^render/comrades/$',
         render_comrades),
     url(r'^logout/$',
-        logout, {'next_page': 'preapplanding:landing'},
+        logout_account, # {'next_page': 'preapplanding:landing'},
         name='Logout'),
     url(r'^check/login/$',
         check_if_logged_in,
@@ -32,6 +32,8 @@ urlpatterns = [
         instrument_choices),
     url(r'^instrument/add-or-delete/$',
         instrument_add_delete_api),
+    url(r'^login/$',
+        login_account),
 ]
 
 

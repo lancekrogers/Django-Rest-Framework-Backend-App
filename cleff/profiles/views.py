@@ -1,7 +1,7 @@
 from cleff.settings import STATIC_URL
 from .choices_list import GENRES, INSTRUMENT_CLASSES
 from .ranking import update_instrument_rank
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from .models import Genre, Media, Musician, Instrument
 from django.http import JsonResponse, HttpResponse, Http404
@@ -25,7 +25,6 @@ import random
 # Create your views here.
 
 @renderer_classes((JSONRenderer,))
-@csrf_exempt
 @api_view(['POST'])
 def user_creation(request):
     """
@@ -49,11 +48,68 @@ def user_creation(request):
                 #return JsonResponse(data=data, status=status.HTTP_201_CREATED)
                 return redirect('profiles:checklogin')
             except:
-                print('fuck you')
+                pass
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
+
+
+@renderer_classes((JSONRenderer,))
+@api_view(['POST'])
+def login_account(request):
+    context = {}
+    logged_on = False
+    if request.user.is_authenticated():
+        logged_on = True
+        error = 'You are already logged in.'
+        context['error'] = error
+        context['logged_on'] = logged_on
+        return JsonResponse(data=context, status=status.HTTP_200_OK)
+    else:
+        try:
+            username = request.data['username_or_email']
+            password = request.data['password']
+            user = authenticate(username=username, password=password)
+            login(request, user)
+            logged_on = True
+            context['logged_on'] = True
+            context['user'] = username
+            return JsonResponse(data=context, status=status.HTTP_202_ACCEPTED)
+        except:
+            try:
+                email = request.data['username_or_email']
+                password = request.data['password']
+                user_obj = User.objects.get(email=email)
+                user = authenticate(username=user_obj.username, password=password)
+                login(request, user)
+                context['logged_on'] = True
+                context['user'] = user_obj.username
+                return JsonResponse(data=context, status=status.HTTP_202_ACCEPTED)
+            except:
+                context['error'] = "An error occured while validating your credentials. Please try again or create an account."
+                context['logged_on'] = False
+                return JsonResponse(data=context)
+
+@renderer_classes((JSONRenderer,))
+@api_view(['GET'])
+def logout_account(request):
+    context = {}
+    logged_on = False
+    if request.user.is_authenticated():
+        logged_on = True
+        try:
+            logout(request)
+            logged_on = False
+            context['logged_on'] = logged_on
+            return JsonResponse(data=context, status=status.HTTP_202_ACCEPTED)
+        except:
+            context['error'] = 'An error occured with logout'
+            context['logged_on'] = logged_on
+            return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        context['logged_on'] = logged_on
+        return JsonResponse(data=context, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

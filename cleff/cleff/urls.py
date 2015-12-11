@@ -31,4 +31,7 @@ urlpatterns = [
     url(r'^engine/',
         include('engine.urls',
                 namespace='engine')),
+    url(r'^messaging/',
+        include('messaging.urls',
+                namespace='messaging'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

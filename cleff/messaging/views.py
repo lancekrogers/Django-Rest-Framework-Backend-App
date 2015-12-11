@@ -98,7 +98,6 @@ def conversation_delete(request):
     context = {}
     deleted = False
     logged_on = False
-    context['logged_on'] = logged_on
     if request.user.is_authenticated():
         logged_on = True
         try:
@@ -112,9 +111,12 @@ def conversation_delete(request):
                 instance.delete()
                 deleted = True
                 context['deleted'] = deleted
+                context['logged_on'] = logged_on
                 return JsonResponse(data=context, status=status.HTTP_202_ACCEPTED)
         except:
             context['error'] = 'Please submit a sender and receiver'
+            context['logged_on'] = logged_on
             return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
     else:
+        context['logged_on'] = logged_on
         return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
