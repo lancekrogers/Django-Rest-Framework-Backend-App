@@ -273,7 +273,6 @@ def render_comrades(request):
             genres = [x.genre for x in musician.genres.all()]
             instruments = [x.name for x in musician.instruments.all()]
             if musician.media.all():
-           # media = musician.latest_media().audio
                 med = musician.media.all()[0]
                 media = {'title': med.title,
                          'url': STATIC_URL[:-1] + med.audio.url}
