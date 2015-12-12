@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'^render/comrades/$',
         render_comrades),
     url(r'^logout/$',
-        logout_account, # {'next_page': 'preapplanding:landing'},
+        logout_account,
         name='Logout'),
     url(r'^check/login/$',
         check_if_logged_in,

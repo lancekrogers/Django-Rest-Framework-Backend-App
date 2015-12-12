@@ -251,7 +251,7 @@ def user_count_view(request, format=None):
 
 
 @api_view(['GET'])
-#@renderer_classes((JSONRenderer,))
+@renderer_classes((JSONRenderer,))
 def render_comrades(request):
     """
         This is a view that sends a json array of data for use
@@ -272,8 +272,8 @@ def render_comrades(request):
             musician = Musician.objects.get(pk=com.numbre.numbre)
             genres = [x.genre for x in musician.genres.all()]
             instruments = [x.name for x in musician.instruments.all()]
-            if musician.media.all()[0]:
-               # media = musician.latest_media().audio
+            if musician.media.all():
+           # media = musician.latest_media().audio
                 med = musician.media.all()[0]
                 media = {'title': med.title,
                          'url': STATIC_URL[:-1] + med.audio.url}
@@ -296,7 +296,7 @@ def render_comrades(request):
     else:
         pass
     context['logged_on'] = logged_on
-    return JsonResponse(data=context)#Response(context)
+    return JsonResponse(data=context, status=status.HTTP_200_OK)#Response(context)
 
 
 @api_view(['GET'])
