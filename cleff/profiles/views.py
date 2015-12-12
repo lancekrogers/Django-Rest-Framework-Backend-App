@@ -58,6 +58,11 @@ def user_creation(request):
 @renderer_classes((JSONRenderer,))
 @api_view(['POST'])
 def login_account(request):
+    """
+        Use this view to log into an account without sending the username and password over
+        basic auth.  This view also allows a user to login with either their username or email,
+        but only one request needs to be sent.
+    """
     context = {}
     logged_on = False
     if request.user.is_authenticated():
@@ -94,6 +99,10 @@ def login_account(request):
 @renderer_classes((JSONRenderer,))
 @api_view(['GET'])
 def logout_account(request):
+    """
+        This is an api view for logging a user out.  To log a user out, just send a get
+        request to the profiles/logout/ url
+    """
     context = {}
     logged_on = False
     if request.user.is_authenticated():
@@ -387,3 +396,9 @@ def instrument_add_delete_api(request):
         pass
     context['logged_on'] = logged_on
     return JsonResponse(data=context, status=status.HTTP_200_OK)
+
+################
+"""
+Add an api view for updating all aspects of a users profile.
+"""
+################
