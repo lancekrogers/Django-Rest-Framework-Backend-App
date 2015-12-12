@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, DeleteView
 
 from profiles.models import Musician
@@ -46,6 +47,7 @@ class MusicianMusicianConversationDetailView(DetailView):
 # After the message is created add a "link" to the conversation
 # This may be implemented only on the front end, but possibly on the
 # back end after implementation is figured out.
+
 @renderer_classes((JSONRenderer,))
 @api_view(['POST'])
 def message_create(request):
@@ -74,12 +76,12 @@ def message_create(request):
                     conv = TheConversation.objects.create(musician_one=me, musician_two=receiver)
                     conv.messages.add(mm_message)
                     conv.save()
-                    return render(request, context)
+                    return JsonResponse(data=context, status=status.HTTP_200_OK)
                 else:
                     conv = TheConversation.objects.get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=receiver, musician_two=me))
                     conv.messages.add(mm_message)
                     conv.save()
-                    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+                    return JsonResponse(data=context, status=status.HTTP_200_OK)
             except:
                 context['error'] = 'There is an error in lines 88-92 in your message views'
                 context['logged_on'] = logged_on

@@ -54,7 +54,7 @@ def user_creation(request):
     else:
         return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
 
-
+# try catching csrf exceptions here and return a checked login function
 @renderer_classes((JSONRenderer,))
 @api_view(['POST'])
 def login_account(request):
@@ -66,11 +66,15 @@ def login_account(request):
     context = {}
     logged_on = False
     if request.user.is_authenticated():
-        logged_on = True
-        error = 'You are already logged in.'
-        context['error'] = error
-        context['logged_on'] = logged_on
-        return JsonResponse(data=context, status=status.HTTP_200_OK)
+        print('hello its me')
+        try:
+            return redirect('profiles:checklogin')
+        except:
+            logged_on = True
+            error = 'You are already logged in.'
+            context['error'] = error
+            context['logged_on'] = logged_on
+            return JsonResponse(data=context, status=status.HTTP_200_OK)
     else:
         try:
             username = request.data['username_or_email']
@@ -78,7 +82,7 @@ def login_account(request):
             user = authenticate(username=username, password=password)
             login(request, user)
             logged_on = True
-            context['logged_on'] = True
+            context['logged_on'] = logged_on
             context['user'] = username
             return JsonResponse(data=context, status=status.HTTP_202_ACCEPTED)
         except:
@@ -94,7 +98,7 @@ def login_account(request):
             except:
                 context['error'] = "An error occured while validating your credentials. Please try again or create an account."
                 context['logged_on'] = False
-                return JsonResponse(data=context)
+                return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
 
 @renderer_classes((JSONRenderer,))
 @api_view(['GET'])
