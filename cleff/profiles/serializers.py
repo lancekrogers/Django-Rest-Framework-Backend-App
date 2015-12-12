@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.db import IntegrityError
 from rest_framework import serializers
 from .models import Musician, Genre, Media, Instrument
 from .choices_list import GENRES
@@ -21,13 +22,8 @@ class UserSerializer(serializers.ModelSerializer):
             use_r.set_password(validated_data['password'])
             use_r.save()
             Musician.objects.create(user=use_r, email=validated_data['email'], is_musician=True)
-        except:
-            use_r = User(
-                username=validated_data['username']
-            )
-            use_r.set_password(validated_data['password'])
-            use_r.save()
-            Musician.objects.create(user=use_r, is_musician=True)
+        except IntegrityError:
+            pass
         return use_r
 
 

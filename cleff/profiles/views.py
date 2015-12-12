@@ -23,7 +23,6 @@ import random
 
 
 # Create your views here.
-
 @renderer_classes((JSONRenderer,))
 @api_view(['POST'])
 def user_creation(request):
@@ -45,15 +44,47 @@ def user_creation(request):
                 user = authenticate(username=username, password=password)
                 login(request, user)
                 data = {'data': serializer.data, 'logged in': True}
-                #return JsonResponse(data=data, status=status.HTTP_201_CREATED)
-                return redirect('profiles:checklogin')
+                return JsonResponse(data=data, status=status.HTTP_201_CREATED)
+                #return redirect('profiles:checklogin')
             except:
                 pass
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
-
+'''
+@api_view(['POST'])
+def user_creation(request):
+    """
+        This function creates a user and logs them in returning a HTTP 200 OK Response
+        with logged in: True.  To authenticate further use basic authentication.  Look
+        in the music network new folder in your browser for instructions to do this with
+        ajax.
+    """
+    # this is a temporary api view for creating users
+    # this view will be used until token authentication is in place
+    if request.method == 'POST':
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            try:
+                username = request.data['username']
+                password = request.data['password']
+                user = authenticate(username=username, password=password)
+                login(request, user)
+                data = {'data': serializer.data, 'logged in': True}
+                print('Ba')
+                return JsonResponse(data=data, status=status.HTTP_201_CREATED)
+                #return redirect('profiles:checklogin')
+            except:
+                print('Bal')
+            return JsonResponse(data=serializer.data, status=status.HTTP_201_CREATED)
+        print('Ball')
+        return JsonResponse(data=serializer.data, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        print('Balls')
+        return JsonResponse(data="Error", status=status.HTTP_400_BAD_REQUEST)
+'''
 # try catching csrf exceptions here and return a checked login function
 @renderer_classes((JSONRenderer,))
 @api_view(['POST'])
@@ -283,6 +314,7 @@ def genre_choices(request):
     diction['GENRE_CHOICES'] = li
     return JsonResponse(data=diction, status=status.HTTP_200_OK)#, safe=False)
 
+@csrf_exempt
 @renderer_classes((JSONRenderer,))
 @api_view(['POST', 'DELETE'])
 def genre_add_delete_api(request):
