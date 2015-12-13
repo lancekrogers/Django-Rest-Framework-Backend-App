@@ -50,7 +50,7 @@ class Musician(ProfileModel):
     genres = models.ManyToManyField('Genre', blank=True)
     summary = models.TextField(blank=True)
     company = models.CharField(max_length=60, blank=True)
-    media = models.ManyToManyField('Media', blank=True, null=True)
+    media = models.ManyToManyField('Media', blank=True)
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
     instruments = models.ManyToManyField('Instrument', blank=True)
     friends = models.ManyToManyField('SavedMusician', blank=True)

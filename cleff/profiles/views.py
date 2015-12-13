@@ -97,7 +97,6 @@ def login_account(request):
     context = {}
     logged_on = False
     if request.user.is_authenticated():
-        print('hello its me')
         try:
             return redirect('profiles:checklogin')
         except:
@@ -221,35 +220,6 @@ class MediaListCreate(generics.ListCreateAPIView):
 # You will also need to build in a security feature for this.
 
 
-
-"""
-@csrf_exempt
-@api_view(['POST'])
-def media_create_api(request):
-    # an api view for the genre model
-    # authentication will be added later alon with all other views
-    if request.method == 'POST':
-        serializer = GenreSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['GET'])
-@renderer_classes((JSONRenderer,))
-def user_count_view(request, format=None):
-
-    A view that returns the count of active users in JSON.
-
-    user_count = User.objects.filter(active=True).count()
-    content = {'user_count': user_count}
-    return Response(content)
-"""
-
-
 @api_view(['GET'])
 @renderer_classes((JSONRenderer,))
 def render_comrades(request):
@@ -313,14 +283,16 @@ def genre_choices(request):
     diction['GENRE_CHOICES'] = li
     return JsonResponse(data=diction, status=status.HTTP_200_OK)#, safe=False)
 
-@csrf_exempt
-@renderer_classes((JSONRenderer,))
 @api_view(['POST', 'DELETE'])
+#@authentication_classes()
 def genre_add_delete_api(request):
     """
-        This is view for adding or removing a genre from a users
+        This view must be submitted with basic auth.  My goal is to change this
+        before release.
+
+        This view is for adding or removing a genre from a users
         Genres field.
-        To add a Genre send a POST request with the keyword 'Genre' and
+        To add a Genre send a POST request with the keyword 'genre' and
         use the genre choices as a list of choices.
         To remove a genre send a DELETE request in the same format.
     """
@@ -330,9 +302,13 @@ def genre_add_delete_api(request):
         visitor = request.user.musician
         logged_on = True
         if request.method == "POST":
+            print(request.POST)
             try:
-                name = request.data['Genre']
-                genre = Genre.objects.get(genre=name)
+                name = request.data['genre']
+                name.lower()
+                name = name.title()
+                genre = Genre.objects.all().get(genre=name)
+                print('yes {} {}'.format(genre, visitor))
                 visitor.genres.add(genre)
                 context['Genre'] = genre.genre
                 context['Added'] = True
@@ -343,13 +319,21 @@ def genre_add_delete_api(request):
                 return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
         if request.method == "DELETE":
             try:
-                name = request.data['Genre']
-                genre = Genre.objects.get(genre=name)
+                name = request.data['genre']
+                print(name)
+                name = name.lower()
+                name = name.title()
+                print(name, name)
+                genre = Genre.objects.all().get(genre=name)
+                print(genre)
                 visitor.genres.remove(genre)
                 context['Genre'] = genre.genre
                 context['Removed'] = True
+                return JsonResponse(data=context, status=status.HTTP_200_OK)
             except:
-                name = request.data['Genre']
+                name = request.data['genre']
+                name = name.lower()
+                name = name.title()
                 context['Genre'] = name
                 context['Removed'] = False
                 context['logged_on'] = logged_on
@@ -388,9 +372,12 @@ def instrument_choices(request):
 @api_view(['POST', 'DELETE'])
 def instrument_add_delete_api(request):
     """
+        This view must be submitted with basic auth.  My goal is to change this
+        before release.
+
         This is view for adding or removing an instrument from a users
         instruments field.
-        To add an instrument send a POST request with the keyword 'Instrument' and
+        To add an instrument send a POST request with the keyword 'instrument' and
         use the instrument choices as a list of choices.
         To remove an instrument send a DELETE request in the same format.
     """
@@ -401,13 +388,20 @@ def instrument_add_delete_api(request):
         logged_on = True
         if request.method == "POST":
             try:
-                name = request.data['Instrument']
-                instrument = Instrument.objects.get(name=name)
+                name = request.data['instrument']
+                name = name.lower()
+                name = name.title()
+                print(name)
+                instrument = Instrument.objects.all().get(name=name)
+                print(instrument, visitor)
                 visitor.instruments.add(instrument)
                 context['Instrument'] = instrument.name
                 context['Added'] = True
-                instrument.numerator += 100
-                update_instrument_rank(instrument)
+                try:
+                    instrument.numerator += 100
+                    update_instrument_rank(instrument)
+                except:
+                    raise Exception
             except:
                 context['Instrument'] = "Please Select An Instrument"
                 context['Added'] = False
@@ -415,15 +409,16 @@ def instrument_add_delete_api(request):
                 return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
         if request.method == "DELETE":
             try:
-                name = request.data['Instrument']
-                instrument = Instrument.objects.get(name=name)
+                name = request.data['instrument']
+                name = name.lower()
+                name = name.title()
+                instrument = Instrument.objects.all().get(name=name)
                 visitor.instruments.remove(instrument)
                 context['Instrument'] = instrument.name
                 context['Removed'] = True
                 instrument.denominator += 1
             except:
-                name = request.data['Instrument']
-                context['Instrument'] = name
+                context['Instrument'] = "Please check your parameters and try again"
                 context['Removed'] = False
                 context['logged_on'] = logged_on
                 return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
