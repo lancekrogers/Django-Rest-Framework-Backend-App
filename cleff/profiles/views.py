@@ -101,7 +101,7 @@ def login_account(request):
             return redirect('profiles:checklogin')
         except:
             logged_on = True
-            error = 'You are already logged in.'
+            error = 'You are already logged on.'
             context['error'] = error
             context['logged_on'] = logged_on
             return JsonResponse(data=context, status=status.HTTP_200_OK)
@@ -185,6 +185,11 @@ class MediaCreate(generics.CreateAPIView):
     """
     queryset = Media.objects.all()
     serializer_class = MediaSerializer
+
+    # You will need to figure out how to make this save to a musician.media
+    # field
+
+
 
 class MediaDelete(generics.DestroyAPIView):
     """
