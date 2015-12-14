@@ -176,12 +176,24 @@ def check_if_logged_in(request):
     return JsonResponse(data=data, status=status.HTTP_200_OK)
 
 class MediaCreate(generics.CreateAPIView):
+    """
+        To create a media object, send a post request to:
+            /profiles/media/create/
+        In the format:
+            Audio: "audio file upload"
+            Title: "char field"
+    """
     queryset = Media.objects.all()
     serializer_class = MediaSerializer
 
 class MediaDelete(generics.DestroyAPIView):
+    """
+        To delete a media object, send a delete request to:
+            /profiles/media/delete/{"Your audio url"}/
+    """
     queryset = Media.objects.all()
     serializer_class = MediaSerializer
+    lookup_field = "audio"
 
 # To handle many to many fields that need to display, and be deleted by the user
 #

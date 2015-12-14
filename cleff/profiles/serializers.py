@@ -41,11 +41,10 @@ class GenreSerializer(serializers.ModelSerializer):
 class MediaSerializer(serializers.ModelSerializer):
     audio = serializers.FileField(required=True)
     title = serializers.CharField(required=False, max_length=100)
-    lookup_field = "audio"
 
     class Meta:
         model = Media
-        fields = ('user_pk', 'title', 'audio')
+        fields = ('title', 'audio')
 
 
 class InstrumentSerializer(serializers.ModelSerializer):

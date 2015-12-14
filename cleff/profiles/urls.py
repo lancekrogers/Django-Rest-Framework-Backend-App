@@ -6,6 +6,7 @@ from django.conf.urls import include, url
 from rest_framework.urlpatterns import format_suffix_patterns
 from django.contrib.auth.views import logout
 
+
 urlpatterns = [
     url(r'^search/',
         include('haystack.urls')),
@@ -19,7 +20,7 @@ urlpatterns = [
         genre_choices),
     url(r'^media/create/$',
         MediaCreate.as_view()),
-    url(r'^media/delete/(?P<audio>)/$',
+    url(r'^media/delete/{(?P<audio>.*)}/$',
         MediaDelete.as_view()),
     url(r'^render/comrades/$',
         render_comrades),
