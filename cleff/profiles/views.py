@@ -175,43 +175,13 @@ def check_if_logged_in(request):
         return JsonResponse(data=data, status=status.HTTP_200_OK)
     return JsonResponse(data=data, status=status.HTTP_200_OK)
 
-
-@renderer_classes((JSONRenderer,))
-class MediaDetail(APIView):
-
-    #authentication_classes = (SessionAuthentication, BasicAuthentication)
-   # permission_classes = (IsAuthenticated,)
-
-    def get_object(self, pk):
-        try:
-            return Media.objects.get(pk=pk)
-        except Media.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        media = self.get_object(pk)
-        serializer = MediaSerializer(media)
-        return Response(serializer.data)
-
-    def put(self, request, pk, format=None):
-        media = self.get_object(pk)
-        serializer = MediaSerializer(media, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, format=None):
-        musician = request.user.musician
-        if request.user.musician.pk == self.user_pk:
-            media = self.get_object(pk)
-            media.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-class MediaListCreate(generics.ListCreateAPIView):
+class MediaCreate(generics.CreateAPIView):
     queryset = Media.objects.all()
     serializer_class = MediaSerializer
 
+class MediaDelete(generics.DestroyAPIView):
+    queryset = Media.objects.all()
+    serializer_class = MediaSerializer
 
 # To handle many to many fields that need to display, and be deleted by the user
 #
@@ -229,7 +199,6 @@ def render_comrades(request):
         This will be used in source tags for media rendering.
     """
     context = {}
-    print('.......render_comrades .....musician....')
     logged_on = False
     if request.user.is_authenticated():
         visitor = request.user.musician

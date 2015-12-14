@@ -40,7 +40,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class MediaSerializer(serializers.ModelSerializer):
     audio = serializers.FileField(required=True)
-    user_pk = serializers.IntegerField(required=True)
+    title = serializers.CharField(required=False, max_length=100)
+    lookup_field = "audio"
 
     class Meta:
         model = Media
