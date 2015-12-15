@@ -12,14 +12,15 @@ from django.utils.translation import ugettext_lazy as _
 import random
 # Create your models here.
 
+
+
 # An Abstract Base User Model
 class ProfileModel(models.Model):
-    random_int = str(random.random())
     user = models.OneToOneField(User, primary_key=True)
     email = models.EmailField(blank=True, unique=True)
     first_name = models.CharField(max_length=40, blank=True)
     last_name = models.CharField(max_length=40, blank=True)
-    profile_image = models.ImageField(upload_to='profile_image/%Y/%m/%d/{}'.format(random_int), blank=True)
+    profile_image = models.ImageField(upload_to='profile_image/%Y/%m/%d/', blank=True)
     locations = models.ManyToManyField('Location', blank=True)
     current_location = GeopositionField(blank=True)  # comrades are the matched users
     is_musician = models.BooleanField(default=False)  # the more times a comrade with the same user_pk
@@ -60,10 +61,6 @@ class Musician(ProfileModel):
     def __str__(self):
         return '{}'.format(self.user.username)
 
-    def latest_media(self):
-        if Media.objects.filter(user_pk=self.pk):
-            return Media.objects.filter(user_pk=self.pk)[0]
-
 
 class Genre(models.Model):
     genre = models.CharField(choices=GENRES, max_length=20)
@@ -77,12 +74,11 @@ class Genre(models.Model):
 
 
 class Media(models.Model):
-    rand_int = str(random.random())
     user_pk = models.IntegerField(default=-1)
     title = models.CharField(max_length=20)
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
     youtube_code = models.CharField(max_length=20, blank=True)
-    audio = models.FileField(upload_to='audio/%Y/%m/%d/{}'.format('sound' + rand_int), blank=True)
+    audio = models.FileField(upload_to='audio/%Y/%m/%d/{}'.format('sound'), blank=True)
 
     def __str__(self):
         return '{} {}'.format(self.title, self.timestamp)
