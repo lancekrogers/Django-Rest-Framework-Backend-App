@@ -19,7 +19,7 @@ urlpatterns = [
     url(r'^genre/choices/$',
         genre_choices),
     url(r'^media/create/$',
-        MediaCreate.as_view()),
+        MediaCreate),
     url(r'^media/delete/{(?P<audio>.*)}/$',
         MediaDelete.as_view()),
     url(r'^render/comrades/$',

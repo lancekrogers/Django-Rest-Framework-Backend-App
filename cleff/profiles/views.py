@@ -175,20 +175,28 @@ def check_if_logged_in(request):
         return JsonResponse(data=data, status=status.HTTP_200_OK)
     return JsonResponse(data=data, status=status.HTTP_200_OK)
 
-class MediaCreate(generics.CreateAPIView):
-    """
-        To create a media object, send a post request to:
-            /profiles/media/create/
-        In the format:
-            Audio: "audio file upload"
-            Title: "char field"
-    """
-    queryset = Media.objects.all()
-    serializer_class = MediaSerializer
 
-    # You will need to figure out how to make this save to a musician.media
-    # field
-
+@api_view(['POST'])
+def MediaCreate(request):
+    context = {}
+    logged_on = False
+    if request.user.is_authenticated():
+        logged_on = True
+        visitor = request.user.musician
+        serializer = MediaSerializer(data=request.data)
+        if request.method == "POST":
+            if serializer.is_valid():
+                serializer.save()
+                try:
+                    x = serializer.instance
+                    visitor.media.add(x)
+                    context['upload'] = True
+                except:
+                    error = "Media Not Added to Profile"
+                    context['logged_on', 'error', 'upload'] = logged_on, error, False
+                    return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
+    context['logged_on'] = logged_on
+    return JsonResponse(data=context, status=status.HTTP_200_OK)
 
 
 class MediaDelete(generics.DestroyAPIView):
