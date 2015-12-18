@@ -418,6 +418,13 @@ class UpdateSearchRange(generics.UpdateAPIView):
 
 @api_view(['POST'])
 def update_search_range(request):
+    """
+        Send a Post request to /profiles/update/search/range/
+        while logged in in the format below:
+        search_range: INTEGER
+
+        Make sure you enter a valid integer from 0 to 24901 (the circumference of the earth in miles)
+    """
     logged_on = False
     update_status = False
     context = {}
@@ -441,7 +448,7 @@ def update_search_range(request):
                 return JsonResponse(data=context,
                                     status=status.HTTP_202_ACCEPTED)
             except:
-                context['error'] = 'An error occurred'
+                context['error'] = 'An error occurred, make sure you are sending the correct data'
                 return JsonResponse(data=context,
                                     status=status.HTTP_400_BAD_REQUEST)
         else:

@@ -12,6 +12,16 @@ from django.utils.translation import ugettext_lazy as _
 import random
 # Create your models here.
 
+class MaxOrMinIntegerField(models.IntegerField):
+    description = _("Positive integer")
+
+    def get_internal_type(self):
+        return "PositiveIntegerField"
+
+    def formfield(self, **kwargs):
+        defaults = {'min_value': 0, 'max_value': 24901}
+        defaults.update(kwargs)
+        return super(MaxOrMinIntegerField, self).formfield(**defaults)
 
 
 # An Abstract Base User Model
@@ -24,7 +34,7 @@ class ProfileModel(models.Model):
     locations = models.ManyToManyField('Location', blank=True)
     current_location = GeopositionField(blank=True)  # comrades are the matched users
     is_musician = models.BooleanField(default=False)  # the more times a comrade with the same user_pk
-    search_range = models.IntegerField(default=30)  #
+    search_range = MaxOrMinIntegerField(default=30)  #
     comrades = models.ManyToManyField('Comrade', blank=True)  #
 
     def profile_image_func(self):
