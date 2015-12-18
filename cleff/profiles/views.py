@@ -419,6 +419,7 @@ class UpdateSearchRange(generics.UpdateAPIView):
 @api_view(['POST'])
 def update_search_range(request):
     logged_on = False
+    update_status = False
     context = {}
     if request.user.is_authenticated():
         logged_on = True
@@ -428,12 +429,15 @@ def update_search_range(request):
             context['method'] = request.method
             try:
                 search_r = request.data['search_range']
-                model = Musician.objects.all().filter(pk=visitor.pk)
+                model = Musician.objects.all().get(pk=visitor.pk)
                 model.search_range = search_r
                 try:
-                    model.save(update_fields=[])
-                context['updated'] = True
-                context['search_range'] = search_r
+                    model.save()
+                    update_status = True
+                except:
+                    update_status = False
+                context['updated'] = update_status
+                context['search_range'] = visitor.search_range
                 return JsonResponse(data=context,
                                     status=status.HTTP_202_ACCEPTED)
             except:
