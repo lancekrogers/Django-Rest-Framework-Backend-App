@@ -60,10 +60,11 @@ class MusicianProfileUpdateSerializer(serializers.ModelSerializer):
         model = Musician
         fields = ('profile_image',
                   'summary',
-                  'company', )
+                  'company',
+                  'media')
 
 
-class MusianUpdateSearchRangeSerializer(serializers.ModelSerializer):
+class MusicianUpdateSearchRangeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Musician

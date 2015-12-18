@@ -1,7 +1,7 @@
 from .views import user_creation,  render_comrades, check_if_logged_in, \
     genre_choices, genre_add_delete_api, instrument_choices, \
     instrument_add_delete_api, login_account, logout_account, MediaCreate, \
-    MediaDelete
+    MediaDelete, update_search_range
 from django.conf.urls import include, url
 from rest_framework.urlpatterns import format_suffix_patterns
 from django.contrib.auth.views import logout
@@ -36,6 +36,9 @@ urlpatterns = [
         instrument_add_delete_api),
     url(r'^login/$',
         login_account),
+    url(r'^update/search/range/$',
+        update_search_range,
+        name='update_search_range'),
 ]
 
 

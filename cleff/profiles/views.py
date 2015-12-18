@@ -1,15 +1,18 @@
 from cleff.settings import STATIC_URL
+
+from django.utils.decorators import method_decorator
 from .choices_list import GENRES, INSTRUMENT_CLASSES
 from .ranking import update_instrument_rank
 from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Genre, Media, Musician, Instrument
 from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
-from .serializers import UserSerializer, GenreSerializer, MediaSerializer
+from .serializers import UserSerializer, GenreSerializer, MediaSerializer, \
+    MusicianProfileUpdateSerializer, MusicianUpdateSearchRangeSerializer
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from rest_framework import serializers
@@ -52,39 +55,8 @@ def user_creation(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response('NOT ALLOWED', status=status.HTTP_400_BAD_REQUEST)
-'''
-@api_view(['POST'])
-def user_creation(request):
-    """
-        This function creates a user and logs them in returning a HTTP 200 OK Response
-        with logged in: True.  To authenticate further use basic authentication.  Look
-        in the music network new folder in your browser for instructions to do this with
-        ajax.
-    """
-    # this is a temporary api view for creating users
-    # this view will be used until token authentication is in place
-    if request.method == 'POST':
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            try:
-                username = request.data['username']
-                password = request.data['password']
-                user = authenticate(username=username, password=password)
-                login(request, user)
-                data = {'data': serializer.data, 'logged in': True}
-                print('Ba')
-                return JsonResponse(data=data, status=status.HTTP_201_CREATED)
-                #return redirect('profiles:checklogin')
-            except:
-                print('Bal')
-            return JsonResponse(data=serializer.data, status=status.HTTP_201_CREATED)
-        print('Ball')
-        return JsonResponse(data=serializer.data, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        print('Balls')
-        return JsonResponse(data="Error", status=status.HTTP_400_BAD_REQUEST)
-'''
+
+
 # try catching csrf exceptions here and return a checked login function
 @renderer_classes((JSONRenderer,))
 @api_view(['POST'])
@@ -178,6 +150,13 @@ def check_if_logged_in(request):
 
 @api_view(['POST'])
 def MediaCreate(request):
+    """
+        To add a media object to a user, send the following to media/create
+         while logged in as the user you want to add the media too:
+
+         audio:  "An audio File" (send as a file)
+         title: The title of the uploaded file
+    """
     context = {}
     logged_on = False
     if request.user.is_authenticated():
@@ -193,7 +172,9 @@ def MediaCreate(request):
                     context['upload'] = True
                 except:
                     error = "Media Not Added to Profile"
-                    context['logged_on', 'error', 'upload'] = logged_on, error, False
+                    context['logged_on'] = logged_on
+                    context['error'] = error
+                    context['upload'] = False
                     return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
     context['logged_on'] = logged_on
     return JsonResponse(data=context, status=status.HTTP_200_OK)
@@ -284,6 +265,7 @@ def genre_add_delete_api(request):
         This view must be submitted with basic auth.  My goal is to change this
         before release.
 
+        To find a list of available genres send a get request to /profiles/genre/choices/
         This view is for adding or removing a genre from a users
         Genres field.
         To add a Genre send a POST request with the keyword 'genre' and
@@ -369,6 +351,7 @@ def instrument_add_delete_api(request):
         This view must be submitted with basic auth.  My goal is to change this
         before release.
 
+        To find a list of available genres send a get request to /profiles/instrument/choices/
         This is view for adding or removing an instrument from a users
         instruments field.
         To add an instrument send a POST request with the keyword 'instrument' and
@@ -425,4 +408,53 @@ def instrument_add_delete_api(request):
 """
 Add an api view for updating all aspects of a users profile.
 """
+
+
 ################
+
+class UpdateSearchRange(generics.UpdateAPIView):
+    serializer_class = MusicianUpdateSearchRangeSerializer
+    queryset = Musician.objects.all()
+
+@api_view(['POST'])
+def update_search_range(request):
+    logged_on = False
+    context = {}
+    if request.user.is_authenticated():
+        logged_on = True
+        visitor = request.user.musician
+        context['logged_on'] = logged_on
+        if request.method == 'POST':
+            context['method'] = request.method
+            try:
+                search_r = request.data['search_range']
+                model = Musician.objects.all().filter(pk=visitor.pk)
+                model.search_range = search_r
+                try:
+                    model.save(update_fields=[])
+                context['updated'] = True
+                context['search_range'] = search_r
+                return JsonResponse(data=context,
+                                    status=status.HTTP_202_ACCEPTED)
+            except:
+                context['error'] = 'An error occurred'
+                return JsonResponse(data=context,
+                                    status=status.HTTP_400_BAD_REQUEST)
+        else:
+            context['error'] = 'Method {} not allowed'.format(request.method)
+            return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        context['logged_on'] = logged_on
+        return JsonResponse(data=context,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
+
+
+
