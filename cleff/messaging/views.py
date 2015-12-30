@@ -52,18 +52,24 @@ class MusicianMusicianConversationDetailView(DetailView):
 @api_view(['POST'])
 def message_create(request):
     """
-    This view is for sending messages.  It looks for existing conversations and if they are
-    not there it creates a conversation and a message.
+    This view is for sending messages.  Send a POST request with the keys,
+    message_body, and receiver_username
     """
     context = {}
     logged_on = False
     if request.user.is_authenticated():
         logged_on = True
         if request.method == 'POST':
-            message_t = request.data['message']
-            reciever_name = request.data['reciever_username']
-            r_user = User.objects.get(username=reciever_name)
-            receiver = Musician.objects.get(user=r_user)  # This may or may not work
+            message_t = request.data['message_body']
+            receiver_name = request.data['receiver_username']
+            try:
+                r_user = User.objects.get(username=receiver_name)
+                receiver = Musician.objects.get(user=r_user)  # This may or may not work
+            except:
+                error = "Receiver does not exist"
+                context['logged_on'] = logged_on
+                context['error'] = error
+                return JsonResponse(data=context, status=status.HTTP_400_BAD_REQUEST)
             me = request.user.musician
             mm_message = Message.objects.create(
                 sender=me,
@@ -72,18 +78,22 @@ def message_create(request):
             )
             mm_message.save()
             try:
-                if not TheConversation.objects.get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=receiver, musician_two=me)):
-                    conv = TheConversation.objects.create(musician_one=me, musician_two=receiver)
-                    conv.messages.add(mm_message)
+                if not TheConversation.objects.all().filter(Q(musician_one=me, musician_two=receiver) | Q(musician_one=receiver, musician_two=me)):
+                    conv = TheConversation.objects.create(
+                            musician_one=me,
+                            musician_two=receiver,
+                            initializer=me
+                    )
                     conv.save()
-                    return JsonResponse(data=context, status=status.HTTP_200_OK)
+                    conv.messages.add(mm_message)
+                    return JsonResponse(data=context, status=status.HTTP_100_CONTINUE)
                 else:
-                    conv = TheConversation.objects.get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=receiver, musician_two=me))
+                    conv = TheConversation.objects.all().get(Q(musician_one=me, musician_two=receiver) | Q(musician_one=receiver, musician_two=me))
                     conv.messages.add(mm_message)
                     conv.save()
-                    return JsonResponse(data=context, status=status.HTTP_200_OK)
+                    return JsonResponse(data=context, status=status.HTTP_100_CONTINUE)
             except:
-                context['error'] = 'There is an error in lines 88-92 in your message views'
+                context['error'] = 'There is an error in your message create view'
                 context['logged_on'] = logged_on
                 return JsonResponse(data=context, status=status.HTTP_403_FORBIDDEN)
 
