@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from profiles.models import Musician, Location, SavedMusician, Comrade
 from django.contrib.gis.geos import Point
 from django.http import HttpResponse, JsonResponse
@@ -17,6 +18,7 @@ def update_comrades_view(request):
             user.current_location = cor_data
             user.save()
             coor = user.current_location
+            print(coor)
             lat = float(coor.latitude)
             lon = float(coor.longitude)
             current_location = Point(lon, lat)
@@ -26,10 +28,10 @@ def update_comrades_view(request):
                 'location',
                 current_location,
                 max_dist)
-            print(loc_match)
             com_list = []
             if len(loc_match) > 0:
                 for obj in loc_match:
+                    print("obj: {}".format(obj.pk))
                     try:
                         loc_o_user = Musician.objects.get(pk=obj.pk)
                         if loc_o_user != user:
@@ -49,13 +51,16 @@ def update_comrades_view(request):
                                 com = Comrade.objects.create(numbre=sav)
                                 com.save()
                                 com_list.append(com)
-                            if com in user.comrades.all():
-                                print('Com {} already in {}s comrade list'.format(
-                                    com,
-                                    user))
-                                pass
-                            else:
-
+                            try:
+                                if com in user.comrades.all():
+                                    print('Com {} already in {}s comrade list'.format(
+                                        com,
+                                        user))
+                                    pass
+                                else:
+                                    user.comrades.add(com)
+                                    user.save()
+                            except:
                                 user.comrades.add(com)
                                 user.save()
                     except:
@@ -68,3 +73,5 @@ def update_comrades_view(request):
                 else:
                     pass
             return HttpResponse('success', status=200)
+    else:
+        return HttpResponse('Method Not Allowed', status=405)

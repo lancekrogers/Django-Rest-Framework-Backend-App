@@ -409,7 +409,6 @@ def instrument_add_delete_api(request):
 Add an api view for updating all aspects of a users profile.
 """
 
-
 ################
 
 class UpdateSearchRange(generics.UpdateAPIView):
